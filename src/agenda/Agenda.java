@@ -5,6 +5,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import exceptions.AgendaException;
+
 /**
  * Klasse die een agenda representeert. Een agenda beheert verschillenden
  * agenda-items (zoals todo's en afspraken).

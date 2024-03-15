@@ -1,4 +1,4 @@
-package agenda;
+package exceptions;
 
 public class AgendaException extends Exception{
 
