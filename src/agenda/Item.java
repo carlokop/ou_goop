@@ -11,7 +11,7 @@ import exceptions.DatumVerledenException;
  * @author carlo
  *
  */
-public class Item extends AgendaItem implements Cloneable {
+public class Item<E> extends AgendaItem implements Cloneable {
   
   private LocalDate begindatum;
   private LocalTime begintijd;
@@ -32,6 +32,7 @@ public class Item extends AgendaItem implements Cloneable {
    * @throws IllegalStateException
    * 
    * @contract happy
+   *  @requires id > 0
    *  @requires titel is not null of lege string
    *  @requires een  begin datum / tijd combinatie die nu of in de toekomst ligt
    *  @requires een eind datum tijd combinatie die na de begin datum en tijd ligt
@@ -99,7 +100,7 @@ public class Item extends AgendaItem implements Cloneable {
    * @param dt
    * @return LocalDateTime object met hele minuten
    */
-  private static LocalDateTime maakAfgerondeDateTime(LocalDate date, LocalTime time) {
+  public static LocalDateTime maakAfgerondeDateTime(LocalDate date, LocalTime time) {
     int uren = time.getHour();
     int min = time.getMinute();
     LocalTime aangepastetijd = LocalTime.of(uren, min);
@@ -112,7 +113,7 @@ public class Item extends AgendaItem implements Cloneable {
    * @param dt 
    * @return LocalDateTime object met hele minuten
    */
-  private static LocalDateTime maakAfgerondeDateTime(LocalDateTime datetime) {
+  public static LocalDateTime maakAfgerondeDateTime(LocalDateTime datetime) {
     LocalDate date = datetime.toLocalDate();
     int uren = datetime.toLocalTime().getHour();
     int min = datetime.toLocalTime().getMinute();

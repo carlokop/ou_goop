@@ -28,6 +28,7 @@ public class PeriodiekItem extends Item {
    * @throws NietUniekeIdException 
    * 
    * @contract happy
+   *  @requires id > 0
    *  @requires periodiekItemId != id
    *  @assignable periodiekItemId
    *  @signal IllegalArgumentException bij lege String titel

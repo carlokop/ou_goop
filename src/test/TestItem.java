@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import agenda.Item;
-import agenda.Todo;
+import agenda.ToDo;
 import exceptions.DatumVerledenException;
 
 public class TestItem {
@@ -43,8 +43,7 @@ public class TestItem {
     
     
     //negatieve id
-    i1 = new Item(-1,"Afspraak", d1, d2, t1, t2);
-    assertEquals(i1.getId(),-1);
+    assertThrows(IllegalArgumentException.class, () -> { new Item(-1,"Afspraak", d1, d2, t1, t2); });
     
   }
   
@@ -118,6 +117,29 @@ public class TestItem {
     assertTrue(i1.getEindDatum().equals(clone.getEindDatum()));
     assertTrue(i1.getBeginTijd().equals(clone.getBeginTijd()));
     assertTrue(i1.getEindtijd().equals(clone.getEindtijd()));    
+  }
+  
+  @Test
+  public void maakAfgerondeDateTimeTest() {
+    //correct afronden tijd Item.maakAfgerondeDateTime(LocalDateTime)
+    LocalDate date = LocalDate.of(2024, Month.APRIL, 1);
+    LocalTime time = LocalTime.of(12, 04, 10, 5); //12:04 en 10sec en 5 nanoseconde
+    LocalTime time2 = LocalTime.of(12, 04); //12:04 zonder seconden en nanoseconden
+    LocalDateTime dt = LocalDateTime.of(date,time);
+    LocalDateTime dt2 = LocalDateTime.of(date,time2);
+    LocalDateTime dt3 = Item.maakAfgerondeDateTime(dt2);
+    LocalDateTime dt4 = Item.maakAfgerondeDateTime(dt2);
+    assertEquals(dt2,dt3);
+    assertEquals(dt2,dt4);
+    assertEquals(dt3,dt4);
+    
+    //correct afronden tijd Item.maakAfgerondeDateTime(LocalDate, LocalTime)
+    LocalDateTime dt5 = Item.maakAfgerondeDateTime(date, time);
+    LocalDateTime dt6 = Item.maakAfgerondeDateTime(date, time2);
+    assertEquals(dt2,dt5);
+    assertEquals(dt3,dt5);
+    assertEquals(dt3,dt6);
+    assertEquals(dt5,dt6);
   }
 
 

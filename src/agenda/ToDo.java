@@ -11,7 +11,7 @@ import exceptions.ReedsAfgevinktException;
  * @author carlo
  *
  */
-public class Todo extends AgendaItem {
+public class ToDo extends AgendaItem  {
   
   private Boolean afgevinkt = false;
 
@@ -27,6 +27,7 @@ public class Todo extends AgendaItem {
    * @throws ReedsAfgevinktException
    * 
    * @Contract Geldige invoer
+   *  @requires id > 0
    *  @requires titel not null of lege string
    *  @requires einddatum in de toekomst 
    *  @ensures id, titel, einddatum en afgevinkt zijn set
@@ -34,9 +35,9 @@ public class Todo extends AgendaItem {
    *  @assignable id, titel, einddatum
    *  @signal IllegalArgumentException bij lege String titel
    *  @signal NullPointerException bij tittel of LocalDateTime = null
-   *  @signal IllegalStateException bij einddatum in het verleden
+   *  @signal DatumVerledenException bij einddatum in het verleden
    */
-  public Todo(int id, String titel, LocalDate eindDatum) throws IllegalArgumentException, NullPointerException, IllegalStateException, DatumVerledenException {
+  public ToDo(int id, String titel, LocalDate eindDatum) throws IllegalArgumentException, NullPointerException, DatumVerledenException {
     super(id,titel, eindDatum);      
   }
   
@@ -64,7 +65,7 @@ public class Todo extends AgendaItem {
     }
     afgevinkt = true;
   }
-
+  
   /**
    * String representatie van dit object
    * @return de inhoud van dit object

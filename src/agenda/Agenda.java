@@ -1,11 +1,16 @@
 package agenda;
 
+import static org.junit.Assert.assertTrue;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 
 import exceptions.AgendaException;
+import exceptions.DatumVerledenException;
+import exceptions.ReedsAfgevinktException;
 
 /**
  * Klasse die een agenda representeert. Een agenda beheert verschillenden
@@ -17,8 +22,14 @@ import exceptions.AgendaException;
 public class Agenda {
 	
     private int nextId = 0;
-
-	
+    private ArrayList<AgendaItem> items;
+    
+    /**
+     * Maakt nieuwe instantie en initisliseerd een lege lijst met agende items
+     */
+    public Agenda() {
+      items = new ArrayList<>();
+    }
 
     /**
      * De waarde van nextID is met 1 opgehoogd
@@ -98,12 +109,12 @@ public class Agenda {
      *
      * @param titel de titel van de todo
      * @param datum de datum waarop de todo moet worden uitgevoerd
-     * @return de id van de todo
+     * @return de id van de todo of -1 als er een fout is
      */
      /*@ @contract happy path {
      @     @requires titel mag geen lege string zijn
      @     @requires datum is vandaag of in de toekomst
-     @     @ensures de waarde van nextID is met 1 opgehoogd
+     @     @ensures de waarde van nextID is met 1 opgehoogd 
      @     @ensures todo is gemaakt met deze nextId en afgevinkt is false
      @     @ensures todo is toegevoegd aan de agenda
      @     @ensures \result = nextId
@@ -111,7 +122,31 @@ public class Agenda {
      @     @assignable items
      @ }
      @*/
+    /**
+     * Docent:
+     * Ik heb hier staan @ensures afgevinkt is false
+     * Dit wordt eigenlijk al in de todo klasse gedaan net als de meeste andere logica
+     * Had dat hier gemoeten? Dit lijkt onlogisch
+     */
     public int maakToDo(String titel, LocalDate datum) {
+      int id = -1;
+      try {
+        ToDo todo = new ToDo(nextId, titel, datum);
+        id = todo.getId();
+        items.add(todo);
+        getNextId(); //increments nextId 
+      } 
+      //er is geen GUI of iets waar we iets met fouten doen dus ik print ze maar naar het console
+      catch(IllegalArgumentException e) {
+        System.out.println(e);
+      } 
+      catch(NullPointerException e) {
+        System.out.println(e);
+      }
+      catch(DatumVerledenException e) {
+        System.out.println(e);
+      }
+      return id;
     }
 
 
@@ -131,6 +166,16 @@ public class Agenda {
      @ }
      @*/
     public boolean vinkToDoAf(int id) {
+      try {
+        ToDo todo = getTodo(id);        
+        todo.vinkToDoAf();
+        return true;
+      } catch(ReedsAfgevinktException e) {
+        System.out.println(e.getMessage());
+      } catch(NullPointerException e) {
+        System.out.println("ToDo met id: " + id + " niet gevonden");
+      }
+      return false;
     }
 
     /**
@@ -163,8 +208,38 @@ public class Agenda {
      @    @ensures \result = een lijst met kopieen van alle todo's op bepaalde datum al dan niet  afgevinkt
      @ }
      @*/
-    public List<ToDo> /*@ pure */ getToDos(LocalDate datum, boolean afgevinkt) {
+    public List<ToDo> /*@ pure */ getToDos(LocalDate datum, boolean afgevinkt)  {
+      
+      ArrayList<ToDo> todos = new ArrayList<>();
+      for(AgendaItem item: items) {
+        if(item instanceof ToDo) {
+          try {
+            ToDo kopie = (ToDo) item.clone();            
+            if(kopie.getEindDatum().isEqual(datum) && kopie.getAfgevinkt() == afgevinkt) {
+              todos.add(kopie);
+            }
+          } catch(CloneNotSupportedException e) {
+            System.out.println(e.getMessage());
+          }
+        }
+      }      
+      return todos;
     }
+    
+    /**
+     * Gets ToDo met gegeven ID of null
+     * @param id
+     * @return de gevonden Todo instance of null
+     */
+    public ToDo /*@ pure */ getTodo(int id)  {
+      for(AgendaItem item: items) {
+        if(item instanceof ToDo && item.getId() == id) {
+          return (ToDo) item;
+        }
+      }
+      return null; 
+    }
+  
 
     /**
      * Levert een kopie van een item met item.id == id of null als id niet voorkomt in de id's van items
@@ -178,5 +253,7 @@ public class Agenda {
      @*/
     public Item /*@ pure */ getItem(int id) {
     }
+    
+    
 
 }

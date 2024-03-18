@@ -47,8 +47,7 @@ public class TestPeriodiekItem {
     assertEquals(p1.getEindDatum().toString(),"2024-08-14");
     
     //negatieve id
-    p1 = new PeriodiekItem(-1,"Afspraak", d1, d2, t1, t2, 999);
-    assertEquals(p1.getId(),-1);
+    assertThrows(IllegalArgumentException.class, () -> { new PeriodiekItem(-1,"Afspraak", d1, d2, t1, t2,999); });
     
   }
   
@@ -108,7 +107,6 @@ public class TestPeriodiekItem {
   public void PeriodiekItemOngeldigeWaardeTest() {
     //periodiekId == id
     assertThrows(NietUniekeIdException.class, () -> { new PeriodiekItem(1,"Afspraak", d2, d3, t1, t2, 1); });
-    assertThrows(NietUniekeIdException.class, () -> { new PeriodiekItem(-1,"Afspraak", d2, d3, t1, t2, -1); });
   }
   
   @Test 

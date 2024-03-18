@@ -10,24 +10,25 @@ import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import agenda.AgendaItem;
-import agenda.Todo;
+import agenda.PeriodiekItem;
+import agenda.ToDo;
 import exceptions.DatumVerledenException;
 import exceptions.ReedsAfgevinktException;
 
 public class TestToDo {
   
-  private Todo t1;
-  private Todo t2;
-  private Todo t3;
+  private ToDo t1;
+  private ToDo t2;
+  private ToDo t3;
   private LocalDate d1 = LocalDate.of(2024, Month.JUNE, 14);
   private LocalDate d2 = LocalDate.of(2024, Month.AUGUST, 22);
   private LocalDate d3 = LocalDate.of(2024, Month.DECEMBER, 31);
 
   @Before
   public void setUp() throws IllegalArgumentException, NullPointerException, IllegalStateException, DatumVerledenException {
-    t1 = new Todo(1,"todo 1", d1);
-    t2 = new Todo(2,"todo 2", d2);
-    t3 = new Todo(3,"todo 3", d3);
+    t1 = new ToDo(1,"todo 1", d1);
+    t2 = new ToDo(2,"todo 2", d2);
+    t3 = new ToDo(3,"todo 3", d3);
   }
   
   @Test
@@ -38,12 +39,11 @@ public class TestToDo {
     assertEquals(t1.getEindDatum(),d1);
     
     //negatieve id
-    t1 = new Todo(-1,"todo 1", d1);
-    assertEquals(t1.getId(),-1);
+    assertThrows(IllegalArgumentException.class, () -> { new ToDo(-1,"todo 1", d1); });
     
     //titel is null of lege string
-    assertThrows(NullPointerException.class, () -> { new Todo(1,null, d2); });
-    assertThrows(IllegalArgumentException.class, () -> { new Todo(1,"", d2); });
+    assertThrows(NullPointerException.class, () -> { new ToDo(1,null, d2); });
+    assertThrows(IllegalArgumentException.class, () -> { new ToDo(1,"", d2); });
     
   }
   
@@ -52,13 +52,13 @@ public class TestToDo {
     LocalDate d1 = LocalDate.now().minusWeeks(1); //verleden
     LocalDate d2 = LocalDate.now();               //vandaag
     LocalDate d3 = LocalDate.now().plusWeeks(1);  //toekomst
-    t2 = new Todo(2,"todo 2", d2);
-    t3 = new Todo(3,"todo 3", d3);
+    t2 = new ToDo(2,"todo 2", d2);
+    t3 = new ToDo(3,"todo 3", d3);
     assertTrue(t2.einddatumNogNietVerstreken(d2));
     assertTrue(t3.einddatumNogNietVerstreken(d3));
   
     //Dag in het verleden gekozen
-    assertThrows(DatumVerledenException.class, () -> { new Todo(1,"Titel", d1); });
+    assertThrows(DatumVerledenException.class, () -> { new ToDo(1,"Titel", d1); });
     
   }
   

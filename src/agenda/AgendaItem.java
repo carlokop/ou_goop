@@ -20,7 +20,7 @@ public abstract class AgendaItem implements Cloneable {
    * @throws DatumVerledenException 
    */
   public AgendaItem(int id, String titel, LocalDate einddatum) 
-      throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException 
+      throws NullPointerException, IllegalArgumentException, DatumVerledenException 
   {
     if(titel == null) {
       throw new NullPointerException("ToDo titel mag niet null zijn");
@@ -28,6 +28,9 @@ public abstract class AgendaItem implements Cloneable {
     if(titel == "") {
       throw new IllegalArgumentException("ToDo titel mag niet leeg zijn");
     } 
+    if(id < 0) {
+      throw new IllegalArgumentException("ID moet een geheel getal groter dan of gelijk aan 0 zijn maar was " + id);
+    }
 
     if(!einddatumNogNietVerstreken(einddatum)) {
       throw new DatumVerledenException("Einddatum is reeds verstreken");
