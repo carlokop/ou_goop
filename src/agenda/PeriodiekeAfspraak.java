@@ -7,17 +7,17 @@ import java.time.LocalTime;
 import exceptions.DatumVerledenException;
 import exceptions.NietUniekeIdException;
 
-public class PeriodiekItem extends Item {
+public class PeriodiekeAfspraak extends Item {
   
   private int periodiekItemId;
+  
 
   /**
    * Maakt een afspraak item
    * Deze wordt gekenmerkt met een begin datum en tijd en een eind datum en tijd
    * @param id
    * @param titel
-   * @param eindDatum
-   * @param begindatum
+   * @param datum
    * @param begintijd
    * @param eindtijd
    * @param periodiekItemId
@@ -25,25 +25,25 @@ public class PeriodiekItem extends Item {
    * @throws NullPointerException 
    * @throws DatumVerledenException 
    * @throws IllegalStateException
-   * @throws NietUniekeIdException 
    * 
    * @contract happy
    *  @requires id > 0
-   *  @requires periodiekItemId != id
+   *  @requires periodiekItemId > 0
    *  @assignable periodiekItemId
    *  @signal IllegalArgumentException bij lege String titel
+   *  @signal IllegalArgumentException bij id of periodiek id <= 0
    *  @signal NullPointerException bij titel of een datum of tijden = null
-   *  @signal IllegalStateException bij begindatum / tijd combinatie in het verleden
-   *  @signal IllegalStateException bij einddatum / tijd die voor het begin ligt
+   *  @signal IllegalStateException bij datum / tijd combinatie in het verleden
+   *  @signal IllegalStateException bij eindtijd die voor het begin ligt
    *  @signal DatumVerledenException bij begintijd in het verleden
    */
-  public PeriodiekItem(int id, String titel, LocalDate begindatum, LocalDate eindDatum, LocalTime begintijd, LocalTime eindtijd, int periodiekItemId) 
-      throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException, NietUniekeIdException 
+  public PeriodiekeAfspraak(int id, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd, int periodiekItemId) 
+      throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException 
   {
-     super(id, titel, begindatum, eindDatum, begintijd, eindtijd);
+     super(id, titel, datum, begintijd, eindtijd);
      
-     if(id == periodiekItemId) {
-       throw new NietUniekeIdException("periodiekItemId moet anders zijn dan id");
+     if(periodiekItemId <= 0) {
+       throw new IllegalArgumentException("Periodiek ID moet een geheel getal groter dan 0 zijn maar was " + id);
      }
      
      this.periodiekItemId = periodiekItemId;
@@ -73,12 +73,14 @@ public class PeriodiekItem extends Item {
    * @throws CloneNotSupportedException 
    */
   @Override
-  public PeriodiekItem clone() throws CloneNotSupportedException {
-    PeriodiekItem item = (PeriodiekItem) super.clone();
+  public PeriodiekeAfspraak clone() throws CloneNotSupportedException {
+    PeriodiekeAfspraak item = (PeriodiekeAfspraak) super.clone();
     
     item.periodiekItemId = periodiekItemId;
     return item;
   }
+  
+  
 
 
 

@@ -29,16 +29,16 @@ public class AgendaMain {
         LocalTime t2 = LocalTime.of(11, 0);
         LocalTime t5 = LocalTime.of(20, 0);
         LocalTime t6 = LocalTime.of(21, 0);
-//        id = agenda.maakEenmaligeAfspraak("Afspraak1", d1, t5, t6);
-//        System.out.println("Afspraak 1 heeft id " + id);//1
-//        id = agenda.maakEenmaligeAfspraak("Afspraak2", d4, t5, t6);
-//        System.out.println("Afspraak 2 heeft id " + id);//1
-//        ids = agenda.maakPeriodiekeAfspraak("Afspraak3", d1, d2, t1, t2, Frequentie.WEKELIJKS);
-//        System.out.print("Periodieke afspraak  genereert afspraken met id's ");
-//        for (int i = 0; i < ids.size() - 2; i++) {
-//            System.out.print("" + ids.get(i) + ",");
-//        }
-//        System.out.println(ids.get(ids.size() - 1));
+        id = agenda.maakEenmaligeAfspraak("Afspraak1", d1, t5, t6);
+        System.out.println("Afspraak 1 heeft id " + id);//1
+        id = agenda.maakEenmaligeAfspraak("Afspraak2", d4, t5, t6);
+        System.out.println("Afspraak 2 heeft id " + id);//1
+        ids = agenda.maakPeriodiekeAfspraak("Afspraak3", d1, d2, t1, t2, Frequentie.WEKELIJKS);
+        System.out.print("Periodieke afspraak  genereert afspraken met id's ");
+        for (int i = 0; i < ids.size() - 2; i++) {
+            System.out.print("" + ids.get(i) + ",");
+        }
+        System.out.println(ids.get(ids.size() - 1));
         id = agenda.maakToDo("Todo1", d1);
         System.out.println("Todo 1 heeft id " + id); // 15
         id = agenda.maakToDo("Todo2", d2);
@@ -49,19 +49,19 @@ public class AgendaMain {
         agenda.vinkToDoAf(8);
         agenda.vinkToDoAf(10);
         System.out.println("** OPEN TODOs op " + d2);
-//        List<ToDo> todos = agenda.getToDos(d2, false);
-//        for (ToDo todo : todos) {
-//            System.out.println(todo);
-//        }
-//        System.out.println();
-//        System.out.println("** ALLE Items TUSSEN " + d2 + " en " + d5);
-//        List<Item> items = agenda.getItems(d2, d5);
-//        for (Item item : items) {
-//            System.out.println(item);
-//        }
-//        System.out.println();
-//        System.out.println("Item met id = 5");
-//        System.out.println(agenda.getItem(5));
+        List<ToDo> todos = agenda.getToDos(d2, false);
+        for (ToDo todo : todos) {
+            System.out.println(todo);
+        }
+        System.out.println();
+        System.out.println("** ALLE Items TUSSEN " + d2 + " en " + d5);
+        List<AgendaItem> items = agenda.getItems(d2, d5);
+        for (AgendaItem item : items) {
+            System.out.println(item);
+        }
+        System.out.println();
+        System.out.println("Item met id = 5");
+        System.out.println(agenda.getItem(5));
     }
 
 }

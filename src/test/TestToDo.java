@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import agenda.AgendaItem;
-import agenda.PeriodiekItem;
+import agenda.PeriodiekeAfspraak;
 import agenda.ToDo;
 import exceptions.DatumVerledenException;
 import exceptions.ReedsAfgevinktException;
@@ -36,10 +36,11 @@ public class TestToDo {
     //happy
     assertEquals(t1.getTitel(),"todo 1");
     assertEquals(t1.getId(),1);
-    assertEquals(t1.getEindDatum(),d1);
+    assertEquals(t1.getDatum(),d1);
     
-    //negatieve id
+    //negatieve id of id = 0
     assertThrows(IllegalArgumentException.class, () -> { new ToDo(-1,"todo 1", d1); });
+    assertThrows(IllegalArgumentException.class, () -> { new ToDo(0,"todo 1", d1); });
     
     //titel is null of lege string
     assertThrows(NullPointerException.class, () -> { new ToDo(1,null, d2); });

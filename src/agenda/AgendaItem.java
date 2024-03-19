@@ -8,7 +8,7 @@ public abstract class AgendaItem implements Cloneable {
   
   private int id;
   private String titel;
-  private LocalDate einddatum;
+  private LocalDate datum;
 
   /**
    * Inits class 
@@ -19,7 +19,7 @@ public abstract class AgendaItem implements Cloneable {
    * @throws IllegalArgumentException
    * @throws DatumVerledenException 
    */
-  public AgendaItem(int id, String titel, LocalDate einddatum) 
+  public AgendaItem(int id, String titel, LocalDate datum) 
       throws NullPointerException, IllegalArgumentException, DatumVerledenException 
   {
     if(titel == null) {
@@ -28,15 +28,15 @@ public abstract class AgendaItem implements Cloneable {
     if(titel == "") {
       throw new IllegalArgumentException("ToDo titel mag niet leeg zijn");
     } 
-    if(id < 0) {
-      throw new IllegalArgumentException("ID moet een geheel getal groter dan of gelijk aan 0 zijn maar was " + id);
+    if(id <= 0) {
+      throw new IllegalArgumentException("ID moet een geheel getal groter dan 0 zijn maar was " + id);
     }
 
-    if(!einddatumNogNietVerstreken(einddatum)) {
+    if(!einddatumNogNietVerstreken(datum)) {
       throw new DatumVerledenException("Einddatum is reeds verstreken");
     } 
     
-    this.einddatum = einddatum;
+    this.datum = datum;
     this.id = id;
     this.titel = titel;
   }
@@ -62,9 +62,9 @@ public abstract class AgendaItem implements Cloneable {
    * @param  einddatum
    * @return true als de gekozen datum of vandaag of in de toekomst ligt
    */
-  public Boolean einddatumNogNietVerstreken(LocalDate einddatum) {
+  public Boolean einddatumNogNietVerstreken(LocalDate datum) {
     LocalDate nu = LocalDate.now();
-    return einddatum.isAfter(nu) || einddatum.isEqual(nu);
+    return datum.isAfter(nu) || datum.isEqual(nu);
   }
   
   
@@ -90,8 +90,8 @@ public abstract class AgendaItem implements Cloneable {
    * Geeft einddatum
    * @return LocalDate met de einddatum
    */
-  public LocalDate getEindDatum() {
-    return einddatum;
+  public LocalDate getDatum() {
+    return datum;
   }
   
   

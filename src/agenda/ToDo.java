@@ -72,12 +72,13 @@ public class ToDo extends AgendaItem  {
    */
   @Override
   public String toString() {
-    return "ID: " + getId() + "\n" +
+    return "\n" + 
+        "\n" +
+        "ID: " + getId() + "\n" +
         "Titel: " + getTitel() + "\n" +
-        "Einddatum: " + getEindDatum() + "\n" +
+        "Einddatum: " + getDatum() + "\n" +
         "Afgevinkt: " + afgevinkt + "\n";
   }
-  
   
   
 

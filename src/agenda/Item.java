@@ -11,9 +11,9 @@ import exceptions.DatumVerledenException;
  * @author carlo
  *
  */
-public class Item<E> extends AgendaItem implements Cloneable {
+public class Item extends AgendaItem implements Cloneable {
   
-  private LocalDate begindatum;
+  private LocalDate datum;
   private LocalTime begintijd;
   private LocalTime eindtijd;
 
@@ -22,8 +22,7 @@ public class Item<E> extends AgendaItem implements Cloneable {
    * Deze wordt gekenmerkt met een begin datum en tijd en een eind datum en tijd
    * @param id
    * @param titel
-   * @param begindatum
-   * @param eindDatum
+   * @param datum
    * @param begintijd
    * @param eindtijd
    * @throws NullPointerException 
@@ -35,24 +34,24 @@ public class Item<E> extends AgendaItem implements Cloneable {
    *  @requires id > 0
    *  @requires titel is not null of lege string
    *  @requires een  begin datum / tijd combinatie die nu of in de toekomst ligt
-   *  @requires een eind datum tijd combinatie die na de begin datum en tijd ligt
+   *  @requires een eind tijd die na de begin datum en tijd ligt
    *  @ensures alle attributen zijn set 
    *  @ensures eind datum en tijd ligt na het begin
-   *  @assignable id, titel, einddatum, begindatum, begintijd, eindtijd
+   *  @assignable id, titel, datum, begintijd, eindtijd
    *  @signal IllegalArgumentException bij lege String titel
    *  @signal NullPointerException bij titel of een datum of tijden = null
-   *  @signal IllegalStateException bij begindatum / tijd combinatie in het verleden
-   *  @signal IllegalStateException bij einddatum / tijd die voor het begin ligt
+   *  @signal IllegalStateException bij datum / tijd combinatie in het verleden
+   *  @signal IllegalStateException bij eindtijd die voor het begin ligt
    *  @signal DatumVerledenException bij begintijd in het verleden
    */
-  public Item(int id, String titel, LocalDate begindatum, LocalDate einddatum, LocalTime begintijd, LocalTime eindtijd) 
+  public Item(int id, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd) 
     throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException 
   {
-    super(id,titel, einddatum); 
+    super(id,titel, datum); 
 
-    Item.checkGeldigeDateTime(begindatum,einddatum,begintijd,eindtijd);    
+    Item.checkGeldigeDateTime(datum,begintijd,eindtijd);    
     this.begintijd = begintijd;
-    this.begindatum = begindatum;
+    this.datum = datum;
     this.eindtijd = eindtijd;
   }
   
@@ -66,7 +65,7 @@ public class Item<E> extends AgendaItem implements Cloneable {
    * @throws DatumVerledenException 
    * @throws DatumVerledenException
    */
-  private static void checkGeldigeDateTime(LocalDate begindatum, LocalDate einddatum, LocalTime begintijd, LocalTime eindtijd) 
+  private static void checkGeldigeDateTime(LocalDate datum, LocalTime begintijd, LocalTime eindtijd) 
       throws DatumVerledenException, IllegalStateException, DatumVerledenException 
   {
     
@@ -74,8 +73,8 @@ public class Item<E> extends AgendaItem implements Cloneable {
     //terwijl die in de testklasse ook door LocalDateTime.now() wordt gemaakt 
     //Dit rond de tijden af op hele minuten. Dat is goed voor deze
     LocalDateTime nu = maakAfgerondeDateTime(LocalDateTime.now());
-    LocalDateTime begin = Item.maakAfgerondeDateTime(begindatum, begintijd);
-    LocalDateTime einde = Item.maakAfgerondeDateTime(einddatum,eindtijd);
+    LocalDateTime begin = Item.maakAfgerondeDateTime(datum, begintijd);
+    LocalDateTime einde = Item.maakAfgerondeDateTime(datum,eindtijd);
     
     //begin in het verleden
     if(begin.isBefore(nu)) {
@@ -131,12 +130,12 @@ public class Item<E> extends AgendaItem implements Cloneable {
     Item item = (Item) super.clone();
     
     //Diepe kloon datum en tijd 
-    LocalDate begind = LocalDate.of(begindatum.getYear(), begindatum.getMonth(), begindatum.getDayOfMonth());
+    LocalDate begind = LocalDate.of(datum.getYear(), datum.getMonth(), datum.getDayOfMonth());
     LocalTime begint = LocalTime.of(begintijd.getHour(), begintijd.getMinute(), begintijd.getSecond(), begintijd.getNano());
     LocalTime eindt = LocalTime.of(eindtijd.getHour(), eindtijd.getMinute(), eindtijd.getSecond(), eindtijd.getNano());
    
     item.begintijd = begint;
-    item.begindatum = begind;
+    item.datum = begind;
     item.eindtijd = eindt;
     return item;
   }
@@ -147,12 +146,13 @@ public class Item<E> extends AgendaItem implements Cloneable {
    */
   @Override
   public String toString() {
-    return "ID: " + getId() + "\n" +
+    return "\n" + 
+        "\n" + 
+        "ID: " + getId() + "\n" +
         "Titel: " + getTitel() + "\n" +
-        "Begindatum: " + begindatum.toString() + "\n" +
+        "Begindatum: " + datum.toString() + "\n" +
         "Begintijd: " + begintijd.toString() + "\n" +
-        "Einddatum: " + getEindDatum().toString() + "\n" +
-        "Eindtijd: " + eindtijd.toString() + "\n";
+        "Eindtijd: " + eindtijd.toString();
   }
   
   
@@ -160,9 +160,9 @@ public class Item<E> extends AgendaItem implements Cloneable {
    * Geeft begindatun
    * @return LocalDate met begindatum
    */
-  public LocalDate getBeginDatum() {
-    return begindatum;
-  }
+//  public LocalDate getDatum() {
+//    return datum;
+//  }
   
   /**
    * Geeft begintijd

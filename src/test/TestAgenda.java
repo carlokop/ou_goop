@@ -1,6 +1,9 @@
 package test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDate;
@@ -8,13 +11,18 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import agenda.Agenda;
 import agenda.AgendaItem;
+import agenda.PeriodiekeAfspraak;
+import agenda.Frequentie;
+import agenda.Item;
 import agenda.ToDo;
+import exceptions.AgendaException;
 import exceptions.DatumVerledenException;
 
 public class TestAgenda {
@@ -45,11 +53,11 @@ public class TestAgenda {
     //happy
     //test juist ID wordt toegewezen en teruggegeven
     int id = agenda.maakToDo("titel", d1);
-    assertTrue(id == 0);
-    id = agenda.maakToDo("titel", d1);
     assertTrue(id == 1);
+    id = agenda.maakToDo("titel", d1);
+    assertTrue(id == 2);
     
-    //null of lege string in titel geenft -1 terug en fout wordt afgehandeld
+    //null of lege string in titel geeft -1 terug en fout wordt afgehandeld
     id = agenda.maakToDo("", d1);
     assertTrue(id == -1);
     id = agenda.maakToDo(null, d1);
@@ -67,6 +75,9 @@ public class TestAgenda {
     int id = agenda.maakToDo("titel:", d1);
     ToDo todo = agenda.getTodo(id);
     assertTrue(todo != null);
+    assertEquals(todo.getTitel(),"titel:");
+    assertEquals(todo.getId(),1);
+    assertEquals(todo.getDatum().toString(),"2025-01-01");
   }
   
   @Test
@@ -77,18 +88,15 @@ public class TestAgenda {
     
     //vink todo met gegeven id af
     agenda.vinkToDoAf(1);
-    ToDo todo1 = agenda.getTodo(0);
-    ToDo todo2 = agenda.getTodo(1);
-    assertFalse(todo1.getAfgevinkt());
-    assertTrue(todo2.getAfgevinkt());
-    
-    System.out.println("id1 = " + id1);
-    System.out.println("todo1 = " + todo1.toString());
+    ToDo todo1 = agenda.getTodo(1);
+    ToDo todo2 = agenda.getTodo(2);
+    assertTrue(todo1.getAfgevinkt());
+    assertFalse(todo2.getAfgevinkt());
     
     //vink 2x dezelfde af
     //voor dit project worden de meeste fouten in de agenda klasse afgehandeld om het systeem niet te laten crashen
     //ik heb op deze plek dan ook geen assertThrows maar er zou wel een system.out.print() zichtbaar moeten zijn.
-    agenda.vinkToDoAf(1);
+    agenda.vinkToDoAf(2);
   }
   
   @Test
@@ -127,38 +135,102 @@ public class TestAgenda {
   }
   
   @Test
-  public void maakEenmaligeAfspraakHappytest() {
-    //maak afspraak instantie
+  public void getItemTest() {
+    int id = agenda.maakEenmaligeAfspraak("Titel", d1, t1, t2);
     
-    //test alle attributen
+    //happy
+    Item item = agenda.getItem(id);
+    assertTrue(item != null);
+    assertEquals(item.getTitel(),"Titel");
+    assertEquals(item.getId(),1);
+    assertEquals(item.getDatum().toString(),"2025-01-01");
     
-    //er moeten hier geen excepties plaatsvinden die worden in de methode van de agenda afgehandeld
-    
+    item = agenda.getItem(-1);
+    assertNull(item);
   }
   
   @Test
-  public void maakEenmaligeAfspraakTest() {
-    //maak instantie met iedere keer een datum of tijd = null
+  public void maakEenmaligeAfspraakHappytest() {
+    //maak afspraak instantie
+    int id = agenda.maakEenmaligeAfspraak("Titel", d1, t1, t2);
     
-    //titel is null
+    //getItem
+    Item item = agenda.getItem(id);
     
-    //titel is lege string
+    //zou geen exepties moeten opgooien wordt in de agenda klasse afgehandeld. Wel System.out.println()
+    agenda.maakEenmaligeAfspraak(null, d1, t1, t2);
+    agenda.maakEenmaligeAfspraak("", d1, t1, t2);
     
-    //afspraak begindatum in het verleden
+    //begintijd > eindtijd
+    agenda.maakEenmaligeAfspraak("Titel", d1, t2, t1);
     
-    //afspraak datum vandaag maar tijd in het verleden
+    //begintijd == eindtijd
+    agenda.maakEenmaligeAfspraak("Titel", d1, t1, t1);
     
-    //afspraak einddatum voor de begindatum
+    //datum in het verleden
+    d1 = LocalDate.of(2023, Month.JANUARY, 1);
+    agenda.maakEenmaligeAfspraak("Titel", d1, t1, t2);
     
-    //afspraak vandaag en begintijd in de toekomst maar eindtijd in het verleden
+    //datum in het verleden + begintijd == eindtijd
+    agenda.maakEenmaligeAfspraak("Titel", d1, t1, t1);
     
-    //afspraak begin en einddatum in de toekomst maar eindtijd voor begintijd
+    //datum vandaag maar begintijd al verstreken
+    LocalDateTime nu = Item.maakAfgerondeDateTime(LocalDateTime.now());
+    LocalDate datenu = nu.toLocalDate();
+    LocalTime uurgeleden = nu.toLocalTime().minusHours(1);
+    LocalTime overeenuur = nu.toLocalTime().plusHours(1);
+    agenda.maakEenmaligeAfspraak("Titel", datenu, uurgeleden, overeenuur);
     
-    //afspraak toekomsst datum en tijd gelijk
-    
-    ///afspraak verleden datum en tijd gelijk
-    
+    //afspraak vandaag en begintijd in de toekomst maar eindtijd in het ver
+    agenda.maakEenmaligeAfspraak("Titel", datenu, overeenuur, uurgeleden);
+
   }
+  
+  @Test
+  public void getItemsTest() throws AgendaException {
+    d1 = LocalDate.of(2025, Month.JANUARY, 1);
+    d2 = LocalDate.of(2025, Month.JANUARY, 2);
+    d3 = LocalDate.of(2025, Month.JANUARY, 3);
+    
+    //voeg 10 items toe met datum 1 jan 2025
+    for(int i=1; i<11; i++) {
+      agenda.maakEenmaligeAfspraak("Titel", d1, t1, t2);
+    }
+    
+    //voeg item toe 2 januari 2025
+    agenda.maakEenmaligeAfspraak("Titel", d2, t1, t2);
+    
+    //voeg 5 todos toe aan de lijst
+    for(int i=1; i<6; i++) {
+      agenda.maakToDo("titel", d1);
+    }
+    
+    //voeg wat periodieke items toe
+    d3 = LocalDate.of(2025, Month.FEBRUARY, 3);
+    List<Integer> list = agenda.maakPeriodiekeAfspraak("titel",d1, d3, t1, t2, Frequentie.WEKELIJKS);
+    assertTrue(list.size() == 5);
+    
+    d3 = LocalDate.of(2025, Month.MARCH, 3);
+    list = agenda.maakPeriodiekeAfspraak("titel",d1, d3, t1, t2, Frequentie.WEKELIJKS);
+    assertTrue(list.size() == 9);
+    assertEquals(list.toString(),"[22, 23, 24, 25, 26, 27, 28, 29, 30]");
+    
+    
+    //alle items incl todos
+    ArrayList<AgendaItem> items = (ArrayList<AgendaItem>) agenda.getItems(d1,d3);
+    assertTrue(items.size() == 30);
+    
+    //alle afspraken en periodieke afspraken
+    ArrayList<Item> afspraken = (ArrayList<Item>) agenda.getAfspraken(d1,d3);
+    assertTrue(afspraken.size() == 25);
+    
+    ArrayList<PeriodiekeAfspraak> periodiekeAfspraken = (ArrayList<PeriodiekeAfspraak>) agenda.getPeriodiekeAfspraken(d1,d3);
+    assertTrue(periodiekeAfspraken.size() == 14);
+    
+        
+  }
+  
+
   
   
   
