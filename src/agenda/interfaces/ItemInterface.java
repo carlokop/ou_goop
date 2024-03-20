@@ -11,19 +11,19 @@ public interface ItemInterface {
  
   /**
    * String representatie van dit object
-   * @return de inhoud van dit object
+   * @return print de inhoud van dit object
    */
   public String toString();
   
   /**
-   * Maakt een shallow kloon van dit object
-   * @throws CloneNotSupportedException 
+   * Maakt een kloon van dit object
+   * @return een kopie van de instantie
    */
   public Object clone();
   
   /**
    * Gekozen einddatum is nog niet verstreken
-   * @param  einddatum
+   * @param  datum  deze datum wordt getest of die nog niet is verstreken
    * @return true als de gekozen datum of vandaag of in de toekomst ligt
    */
   public Boolean einddatumNogNietVerstreken(LocalDate datum);
@@ -43,7 +43,7 @@ public interface ItemInterface {
   
   /**
    * Geeft einddatum
-   * @return LocalDate met de einddatum
+   * @return LocalDate met de datum
    */
   public LocalDate getDatum();
 

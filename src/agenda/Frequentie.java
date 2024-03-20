@@ -13,8 +13,8 @@ public enum Frequentie {
 
     /**
      * Retourneert de volgende datum voor over een week
-     *
-     * @return volgende datum
+     * @param datum    de datum
+     * @return de volgende datum
      */
     public LocalDate volgendeDatum(LocalDate datum) {
         return datum.plusDays(7);

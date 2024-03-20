@@ -9,11 +9,11 @@ import agenda.exceptions.ReedsAfgevinktException;
 import agenda.interfaces.ItemInterface;
 
 /**
- * Generieke klasse Item<T> 
- * Beheert alleen het generieke type <T> 
+ * Generieke klasse Item
+ * Beheert alleen het generieke type 
  * @author carlo
  *
- * @param <T>
+ * @param <T>   Generiek type
  */
 public class Item<T extends AgendaItem> implements ItemInterface, Cloneable {
   
@@ -24,62 +24,61 @@ public class Item<T extends AgendaItem> implements ItemInterface, Cloneable {
   }
   
   /**
-   * Maakt ToDo en sets deze als this.elm
-   * @param nextId
-   * @param titel
-   * @param datum
-   * @throws IllegalArgumentException
-   * @throws NullPointerException
-   * @throws DatumVerledenException
+   * Maakt ToDo en en slaat deze op in dit element
+   * @param id                          unieke identifier
+   * @param titel                       de titel van de todo
+   * @param datum                       de datum waarop de todo plaatsvindt
+   * @throws IllegalArgumentException   Ongeldige waarde meegegeven
+   * @throws NullPointerException       null waarde meegegeven
+   * @throws DatumVerledenException     Gekozen datum ligt in het verleden
    */
   @SuppressWarnings("unchecked")
-  public Item(int nextId, String titel, LocalDate datum) throws IllegalArgumentException, NullPointerException, DatumVerledenException {
-    ToDo todo = new ToDo(nextId,titel,datum);
+  public Item(int id, String titel, LocalDate datum) throws IllegalArgumentException, NullPointerException, DatumVerledenException {
+    ToDo todo = new ToDo(id,titel,datum);
     this.elm = (T) todo;
   }
   
   /**
-   * Maakt eenmalige afspraak en sets als this.elm
-   * @param nextId
-   * @param titel
-   * @param datum
-   * @param begintijd
-   * @param eindtijd
-   * @throws NullPointerException
-   * @throws IllegalArgumentException
-   * @throws IllegalStateException
-   * @throws DatumVerledenException
+   * Maakt eenmalige afspraak en slaat deze op in dit element
+   * @param id                          unieke identifier
+   * @param titel                       de titel van de afspraak
+   * @param datum                       de datum waarop de afspraak plaatsvindt
+   * @param begintijd                   de tijd waarop de afspraak begint
+   * @param eindtijd                    de tijd waarop de afspraak eindigt
+   * @throws NullPointerException       null waarde meegegeven
+   * @throws IllegalArgumentException   Ongeldige waarde meegegeven
+   * @throws IllegalStateException      Ongeldige state meegegeven
+   * @throws DatumVerledenException     Gekozen datum ligt in het verleden
    */
   @SuppressWarnings("unchecked")
-  public Item(int nextId, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd) throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException  {
-    Afspraak afspraak = new Afspraak(nextId,titel,datum,begintijd,eindtijd);
+  public Item(int id, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd) throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException  {
+    Afspraak afspraak = new Afspraak(id,titel,datum,begintijd,eindtijd);
     this.elm = (T) afspraak;
   }
   
   /**
-   * Maakt een periodieke afspraak instantie en sets als this.elm
+   * Maakt een periodieke afspraak instantie en en slaat deze op in dit element
    * Periodieke afspraken in dezelfde serie moeten los van elkaar worden gemaakt
-   * @param nextId
-   * @param titel
-   * @param datum
-   * @param begintijd
-   * @param eindtijd
-   * @param periodiekId
-   * @throws NullPointerException
-   * @throws IllegalArgumentException
-   * @throws IllegalStateException
-   * @throws DatumVerledenException
+   * @param id                          unieke identifier
+   * @param titel                       de titel van de todo
+   * @param datum                       de datum waarop de todo plaatsvindt
+   * @param begintijd                   de tijd waarop de afspraak begint
+   * @param eindtijd                    de tijd waarop de afspraak eindigt
+   * @param periodiekId                 identificeert alle bij elkaar horende periodieke afspraken
+   * @throws NullPointerException       null waarde meegegeven
+   * @throws IllegalArgumentException   ongeldige waarde meegegeven
+   * @throws IllegalStateException      ongeldige state meegegeven
+   * @throws DatumVerledenException     Gekozen datum ligt in het verleden
    */
   @SuppressWarnings("unchecked")
-  public Item(int nextId, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd, int periodiekId) throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException  {
-    @SuppressWarnings("rawtypes")
-    PeriodiekeAfspraak periodiekeafspraak = new PeriodiekeAfspraak(nextId,titel,datum,begintijd,eindtijd, periodiekId);
+  public Item(int id, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd, int periodiekId) throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException  {
+    PeriodiekeAfspraak periodiekeafspraak = new PeriodiekeAfspraak(id,titel,datum,begintijd,eindtijd, periodiekId);
     this.elm = (T) periodiekeafspraak;
   }
   
   /**
    * Geeft het elment
-   * @return elm
+   * @return het element
    */
   public T getElm() {
     return elm;
@@ -149,18 +148,19 @@ public class Item<T extends AgendaItem> implements ItemInterface, Cloneable {
 
   /**
    * Vinkt ToDo af als instance type todo is
-   * @throws AgendaException 
-   * @throws ReedsAfgevinktException
-   * 
-   * @Contract VinkToDoAf
-   *  @requires instantie van ToDo
-   *  @requres afgevinkt = false
-   *  @ensures afgevinkt = true
-   *  @assignable afgervinkt
-   *  @signals ReedsAfgevinktException als afgevinkt reeds true was
-   *  @signals AgendaException als een andere klasse dan Todo de methode aanroept
-   *  
+   * @throws AgendaException                als een andere klasse dan Todo de methode aanroept
+   * @throws ReedsAfgevinktException        als afgevinkt reeds true was
    */
+  /*
+   @ @Contract VinkToDoAf {
+   @  @requires instantie van ToDo
+   @  @requres afgevinkt = false
+   @  @ensures afgevinkt = true
+   @  @assignable afgervinkt
+   @  @signals ReedsAfgevinktException      als afgevinkt reeds true was
+   @  @signals AgendaException              als een andere klasse dan Todo de methode aanroept
+   @  
+   @} */
   public void vinkToDoAf() throws ReedsAfgevinktException, AgendaException {
     if(elm instanceof ToDo) {
       ((ToDo) elm).vinkToDoAf();

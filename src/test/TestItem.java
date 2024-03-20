@@ -21,7 +21,7 @@ import agenda.exceptions.DatumVerledenException;
 import agenda.exceptions.ReedsAfgevinktException;
 
 /**
- * Test de generieke klasse Item<T>
+ * Test de generieke klasse Item
  * @author carlo
  *
  */

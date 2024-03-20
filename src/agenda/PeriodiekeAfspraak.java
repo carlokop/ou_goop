@@ -21,28 +21,30 @@ public class PeriodiekeAfspraak extends Afspraak implements Cloneable {
    * Deze wordt gekenmerkt met een begin datum en tijd en een eind datum en tijd
    * De periodiekeId verwijst naar meerdere periodieke items die bij elkaar horen
    * 
-   * @param id unieke identifier
-   * @param titel
-   * @param datum
-   * @param begintijd
-   * @param eindtijd
-   * @param periodiekItemId verscjhillende instanties voor dezelfde periodieke afspraak hebben dezelfde periodiekeId
-   * @throws IllegalArgumentException 
-   * @throws NullPointerException 
-   * @throws DatumVerledenException 
-   * @throws IllegalStateException
-   * 
-   * @contract happy
-   *  @requires id > 0
-   *  @requires periodiekItemId > 0
-   *  @assignable periodiekItemId
-   *  @signal IllegalArgumentException bij lege String titel
-   *  @signal IllegalArgumentException bij id of periodiek id <= 0
-   *  @signal NullPointerException bij titel of een datum of tijden = null
-   *  @signal IllegalStateException bij datum / tijd combinatie in het verleden
-   *  @signal IllegalStateException bij eindtijd die voor het begin ligt
-   *  @signal DatumVerledenException bij begintijd in het verleden
+   * @param id                          unieke identifier
+   * @param titel                       de titel van de afspraak
+   * @param datum                       de datum waarop de afspraak plaatsvindt
+   * @param begintijd                   de tijd waarop de afspraak begint
+   * @param eindtijd                    de tijd waarop de afspraak eindigt
+   * @param periodiekItemId             verschillende instanties voor dezelfde periodieke afspraak hebben dezelfde periodiekeId
+   * @throws NullPointerException       null waarde meegegeven
+   * @throws IllegalArgumentException   Ongeldige waarde meegegeven
+   * @throws IllegalStateException      Ongeldige state meegegeven
+   * @throws DatumVerledenException     Gekozen datum ligt in het verleden
    */
+  /*
+   @ @contract happy {
+   @  @requires id > 0
+   @  @requires periodiekItemId > 0
+   @  @assignable periodiekItemId
+   @  @signal IllegalArgumentException bij lege String titel
+   @  @signal IllegalArgumentException bij id of periodiek id <= 0
+   @  @signal NullPointerException bij titel of een datum of tijden = null
+   @  @signal IllegalStateException bij datum / tijd combinatie in het verleden
+   @  @signal IllegalStateException bij eindtijd die voor het begin ligt
+   @  @signal DatumVerledenException bij begintijd in het verleden
+   @  }
+   @ */
   public PeriodiekeAfspraak(int id, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd, int periodiekItemId) 
       throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException 
   {
@@ -76,7 +78,6 @@ public class PeriodiekeAfspraak extends Afspraak implements Cloneable {
   /**
    * Maakt een diepe kloon van dit object
    * Begin en eindtijden worden tot duizenste van een seconden nauwkeurig gekopieerds
-   * @throws CloneNotSupportedException 
    */
   @Override
   public PeriodiekeAfspraak clone() {

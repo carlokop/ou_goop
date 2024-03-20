@@ -21,30 +21,31 @@ public class Afspraak extends AgendaItem implements Cloneable {
   /**
    * Maakt een afspraak item
    * Deze wordt gekenmerkt met een begin datum en tijd en een eind datum en tijd
-   * @param id
-   * @param titel
-   * @param datum
-   * @param begintijd
-   * @param eindtijd
-   * @throws NullPointerException 
-   * @throws IllegalArgumentException
-   * @throws DatumVerledenException 
-   * @throws IllegalStateException
-   * 
-   * @contract happy
-   *  @requires id > 0
-   *  @requires titel is not null of lege string
-   *  @requires een  begin datum / tijd combinatie die nu of in de toekomst ligt
-   *  @requires een eind tijd die na de begin datum en tijd ligt
-   *  @ensures alle attributen zijn set 
-   *  @ensures eind datum en tijd ligt na het begin
-   *  @assignable id, titel, datum, begintijd, eindtijd
-   *  @signal IllegalArgumentException bij lege String titel
-   *  @signal NullPointerException bij titel of een datum of tijden = null
-   *  @signal IllegalStateException bij datum / tijd combinatie in het verleden
-   *  @signal IllegalStateException bij eindtijd die voor het begin ligt
-   *  @signal DatumVerledenException bij begintijd in het verleden
+   * @param id unieke identifier
+   * @param titel de titel van de afspraak
+   * @param datum de datum waarop de afspraak plaatsvindt
+   * @param begintijd de tijd waarop de afspraak begint
+   * @param eindtijd de tijd waarop de afspraak eindigt 
+   * @throws NullPointerException       null waarde meegegeven
+   * @throws IllegalArgumentException   Ongeldige waarde meegegeven
+   * @throws IllegalStateException      Ongeldige state meegegeven
+   * @throws DatumVerledenException     Gekozen datum ligt in het verleden
    */
+   /*@
+   @  @contract happy {
+   @   @requires id > 0
+   @   @requires titel is not null of lege string
+   @   @requires een  begin datum / tijd combinatie die nu of in de toekomst ligt
+   @   @requires een eind tijd die na de begin datum en tijd ligt
+   @   @ensures alle attributen zijn set 
+   @   @ensures eind datum en tijd ligt na het begin
+   @   @assignable id, titel, datum, begintijd, eindtijd
+   @   @signals IllegalArgumentException bij lege String titel
+   @   @signals NullPointerException bij titel of een datum of tijden = null
+   @   @signals IllegalStateException bij datum / tijd combinatie in het verleden
+   @   @signals IllegalStateException bij eindtijd die voor het begin ligt
+   @   @signals DatumVerledenException bij begintijd in het verleden
+   @ }*/
   public Afspraak(int id, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd) 
     throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException 
   {
@@ -58,13 +59,12 @@ public class Afspraak extends AgendaItem implements Cloneable {
   
   /**
    * Controleert of er een ongeldige datum of tijd combinatie is gebruikt en gooit dan een exceptie op
-   * @param begindatum
-   * @param eindDatum
-   * @param begintijd
-   * @param eindtijd
-   * @throws IllegalStateException
-   * @throws DatumVerledenException 
-   * @throws DatumVerledenException
+   * @param begindatum                  de datum waarop de eerste afspraak plaatsvindt
+   * @param eindDatum                   na deze datum mogen geen nieuwe afspraken gemaakt worden
+   * @param begintijd                   de tijd waarop de afspraak begint
+   * @param eindtijd                    de tijd waarop de afspraak eindigt
+   * @throws IllegalStateException      Ongeldige begin en eindtijd
+   * @throws DatumVerledenException     Datum is in het verledn
    */
   private static void checkGeldigeDateTime(LocalDate datum, LocalTime begintijd, LocalTime eindtijd) 
       throws DatumVerledenException, IllegalStateException, DatumVerledenException 
@@ -98,9 +98,9 @@ public class Afspraak extends AgendaItem implements Cloneable {
    * Maakt LocalDateTime element met hele minuten ipv duizenste van een seconde
    * Rond de tijd af naar beneden op de hele minuut 
    * Dit lost een bug door verschillen in verwerkingstijd met LocalDateTime.now() op
-   * @param date
-   * @param tijd
-   * @return LocalDateTime object met hele minuten
+   * @param date    datum object
+   * @param time    tijd object
+   * @return LocalDateTime object afgerond naar beneden met hele minuten
    */
   public static LocalDateTime maakAfgerondeDateTime(LocalDate date, LocalTime time) {
     int uren = time.getHour();
@@ -113,9 +113,8 @@ public class Afspraak extends AgendaItem implements Cloneable {
    * Maakt LocalDateTime element met hele minuten ipv duizenste van een seconde 
    * Rond de tijd af naar beneden op de hele minuut 
    * Dit lost een bug door verschillen in verwerkingstijd met LocalDateTime.now() op
-   * @param datum
-   * @param tijd 
-   * @return LocalDateTime object met hele minuten
+   * @param datetime    datetime object
+   * @return LocalDateTime object afgerond naar beneden op hele minuten
    */
   public static LocalDateTime maakAfgerondeDateTime(LocalDateTime datetime) {
     LocalDate date = datetime.toLocalDate();
@@ -128,7 +127,6 @@ public class Afspraak extends AgendaItem implements Cloneable {
   /**
    * Maakt een diepe kloon van dit object
    * Begin en eindtijden worden tot duizenste van een seconden nauwkeurig gekopieerds
-   * @throws CloneNotSupportedException 
    */
   @Override
   public Afspraak clone() {

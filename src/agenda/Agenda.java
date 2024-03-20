@@ -89,15 +89,14 @@ public class Agenda {
      * Genereert afspraken tussen begin- en einddatum (inclusief) op
      * basis van frequentie en voegt deze oe aan de agenda.
      *
-     * @param titel      de titel van de afspraak
-     * @param begindatum de eerste datum waarop de afspraak plaatsvindt
-     * @param einddatum  de laatste datum waarop de afspraak plaatsvindt
-     * @param begintijd  de tijd waarop de afspraak begint
-     * @param eindtijd   de tijd waarop de afspraak eindigt
-     * @param frequentie de periode tussen twee afspraken (Zie enum
-     *                   Frequentie)
+     * @param titel             de titel van de afspraak
+     * @param begindatum        de eerste datum waarop de afspraak plaatsvindt
+     * @param einddatum         de laatste datum waarop de afspraak plaatsvindt
+     * @param begintijd         de tijd waarop de afspraak begint
+     * @param eindtijd          de tijd waarop de afspraak eindigt
+     * @param frequentie        de periode tussen twee afspraken (Zie enum Frequentie)
      * @return een lijst met id's van de gegenereerde afspraken
-     * @throws AgendaException
+     * @throws AgendaException  AgendaFout
      */
      /*@ @contract happy path {
      @     @requires titel mag geen lege string zijn
@@ -161,16 +160,17 @@ public class Agenda {
      * @param eindtijd
      * @param periodiekId
      * @return de item id deze is -1 als er fouten waren
-     * 
-     * @Contract nieuw Periodiekitem happy path
-     *  @requires string != null of gen lege string
-     *  @requires id en periodiekId > 0
-     *  @requires datum en tijden not null
-     *  @requires dat allen gegeven datum en tijden in de toekomst liggen 
-     *  @requires dat de eindtijd na de begintijd ligt
-     *  @ensures dat een periodiek item instantie is creert en toegevoegd aan de items
-     *  @assignable items
-     */
+     */ 
+     /*@
+     @  @Contract nieuw Periodiekitem happy path {
+     @   @requires string != null of gen lege string
+     @   @requires id en periodiekId > 0
+     @   @requires datum en tijden not null
+     @   @requires dat allen gegeven datum en tijden in de toekomst liggen 
+     @   @requires dat de eindtijd na de begintijd ligt
+     @   @ensures dat een periodiek item instantie is creert en toegevoegd aan de items
+     @   @assignable items
+     @ }*/
     @SuppressWarnings("finally")
     private int handleMaakPeriodiekeAfspraak(int id, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd, int periodiekId) 
     {
@@ -192,12 +192,13 @@ public class Agenda {
         }
     } 
 
+   
 
     /**
      * Maakt een todo en voegt deze toe aan de agenda.
      *
-     * @param titel de titel van de todo
-     * @param datum de datum waarop de todo moet worden uitgevoerd
+     * @param titel     de titel van de todo
+     * @param datum     de datum waarop de todo moet worden uitgevoerd
      * @return de id van de todo of -1 als er een fout is
      */
      /*@ @contract happy path {
@@ -211,12 +212,6 @@ public class Agenda {
      @     @assignable items
      @ }
      @*/
-    /**
-     * Docent:
-     * Ik heb hier staan @ensures afgevinkt is false
-     * Dit wordt eigenlijk al in de todo klasse gedaan net als de meeste andere logica
-     * Had dat hier gemoeten? Dit lijkt onlogisch
-     */
     public int maakToDo(String titel, LocalDate datum) {
       int id = -1;
       try {
@@ -241,9 +236,9 @@ public class Agenda {
     /**
      * Vinkt een todo af.
      *
-     * @param id de id van de todo
+     * @param id                de id van de todo
      * @return true als status todo is gewijzigd van false naar true anders false
-     * @throws AgendaException 
+     * @throws AgendaException  Er was een fout in de agenda
      */
      /*@ @contract happy path {
      @     @requires lijst met agenda-items bevat een todo met de gezochte id;
@@ -271,13 +266,10 @@ public class Agenda {
 
     /**
      * Geeft een kopie van alle afspraken of todo's in een bepaalde periode (begin- en einddatum)
-     * @param <T>
-     *
-     * @param begindatum de eerste datum van de periode
-     * @param einddatum  de laatste datum van de periode (inclusief)
+     * @param begindatum        De eerste datum van de periode
+     * @param einddatum         De laatste datum van de periode (inclusief)
      * @return lijst met een kopie van alle items(afspraken of todo's) die vallen in de periode
-     * @throws AgendaException
-     * van begindatum tot en met einddatum
+     * @throws AgendaException  Algemene agendafout
      */
      /*@ @contract happy path {
      @     @requires begindatum ligt voor of op einddatum;

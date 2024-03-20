@@ -18,25 +18,25 @@ public abstract class AgendaItem implements ItemInterface, Cloneable {
 
   /**
    * Inits class 
-   * @param id
-   * @param titel
-   * @param eindDatum 
-   * @throws NullPointerException
-   * @throws IllegalArgumentException
-   * @throws DatumVerledenException 
-   * 
-   * @Contract happy
-   *  @requires titel niet null
-   *  @requires titel geen lege string
-   *  @required id > 0
-   *  @requires dat de einddatum bij creatie nog niet versteken is
-   *  @ensures dat id, titel en datum zijn ingesteld met niet lege of null waarden
-   *  @signal NullPointerException als titel == null
-   *  @signal IllegalArgumentException als titel is lege string
-   *  @signal IllegalArgumentException als id <= 0
-   *  @signal einddatumNogNietVerstreken als datum eerdfer dan vandaag was
-   *  
-   */
+   * @param id                      unieke identifier
+   * @param titel                       de titel van de afspraak
+   * @param datum                       de datum waarop de afspraak plaatsvindt
+   * @throws NullPointerException       null waarde meegegeven
+   * @throws IllegalArgumentException   Ongeldige waarde meegegeven
+   * @throws DatumVerledenException     Gekozen datum ligt in het verleden
+   */ 
+   /*@
+   @ @Contract happy {
+   @  @requires titel niet null
+   @  @requires titel geen lege string
+   @  @required id > 0
+   @  @requires dat de einddatum bij creatie nog niet versteken is
+   @  @ensures dat id, titel en datum zijn ingesteld met niet lege of null waarden
+   @  @signals NullPointerException         als titel == null
+   @  @signals IllegalArgumentException     als titel is lege string
+   @  @signals IllegalArgumentException     als id kleiner of gelijk aan 0
+   @  @signals DatumVerledenException       Datum is is reeds verstreken  
+   @ }*/
   public AgendaItem(int id, String titel, LocalDate datum) 
       throws NullPointerException, IllegalArgumentException, DatumVerledenException 
   {
@@ -68,7 +68,6 @@ public abstract class AgendaItem implements ItemInterface, Cloneable {
   
   /**
    * Maakt een shallow kloon van dit object
-   * @throws CloneNotSupportedException 
    */
   @Override
   public Object clone() {
@@ -78,12 +77,11 @@ public abstract class AgendaItem implements ItemInterface, Cloneable {
       System.out.println(e.getMessage()); 
       return null;
     }
-    
   }
   
   /**
    * Gekozen einddatum is nog niet verstreken
-   * @param  einddatum
+   * @param  datum      deze datum wordt getest of die nog niet is verstreken
    * @return true als de gekozen datum of vandaag of in de toekomst ligt
    */
   public Boolean einddatumNogNietVerstreken(LocalDate datum) {
