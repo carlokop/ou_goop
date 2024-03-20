@@ -1,16 +1,13 @@
 package agenda;
 
-import static org.junit.Assert.assertTrue;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 
-import exceptions.AgendaException;
-import exceptions.DatumVerledenException;
-import exceptions.ReedsAfgevinktException;
+import agenda.exceptions.AgendaException;
+import agenda.exceptions.DatumVerledenException;
+import agenda.exceptions.ReedsAfgevinktException;
 
 /**
  * Klasse die een agenda representeert. Een agenda beheert verschillenden
@@ -22,8 +19,8 @@ import exceptions.ReedsAfgevinktException;
 public class Agenda {
 	
     private int nextId = 0;
-    private ArrayList<AgendaItem> items;
-    private Frequentie frequentie;
+    @SuppressWarnings("rawtypes")
+    private ArrayList<Item> items;
     
     /**
      * Maakt nieuwe instantie en initisliseerd een lege lijst met agende items
@@ -49,17 +46,13 @@ public class Agenda {
 
 
     /**
-     * Maakt een nieuwe afspraak en voegt deze toe aan de agenda.
+     * Maakt een nieuwe eenmalige afspraak en voegt deze toe aan de lijst met items.
      *
      * @param titel     de titel van de afspraak
      * @param datum     de datum waarop de afspraak plaatsvindt
      * @param begintijd de tijd waarop de afspraak begint
      * @param eindtijd  de tijd waarop de afspraak eindigt
      * @return de id van de afspraak
-     * @throws DatumVerledenException 
-     * @throws IllegalStateException 
-     * @throws IllegalArgumentException 
-     * @throws NullPointerException 
      */
 
     /*@ @contract happy path {
@@ -72,13 +65,13 @@ public class Agenda {
      @   @assignable items
      @ }
      @*/
-    public int maakEenmaligeAfspraak(String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd)  {
+    @SuppressWarnings("finally")
+    public int maakEenmaligeAfspraak(String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd)   {
+      int id = -1;
       try {
-        
-        Item item = new Item(getNextId(), titel, datum, begintijd, eindtijd);
+        Item<Afspraak> item = new Item<Afspraak>(getNextId(), titel, datum, begintijd, eindtijd);
         items.add(item);
-        return nextId;
-        
+        id = item.getId();
       } catch(NullPointerException e) {
         System.out.println(e.getMessage());
       } catch(IllegalArgumentException e) {
@@ -87,9 +80,9 @@ public class Agenda {
         System.out.println(e.getMessage());
       } catch(DatumVerledenException e) {
         System.out.println(e.getMessage());
+      } finally {
+        return id;
       }
-      return -1;
-      
     }
 
     /**
@@ -133,6 +126,7 @@ public class Agenda {
           
           if(periodiekId == -1) {
             //de eerste periodieke afspraak heeft een periodiekid == id
+            //volgende periodieke afspraken hebben de periodiekeid die gelijk is aan id van de afspraak op de begindatum
             int id = getNextId();
             periodiekId = handleMaakPeriodiekeAfspraak(id, titel, datum, begintijd,  eindtijd, id);
             ids.add(periodiekId);
@@ -157,7 +151,7 @@ public class Agenda {
     }
     
     /**
-     * Maakt een periodieke item en zorgt voor error handling en vboegt die toe aan de lijst
+     * Maakt een periodieke item en zorgt voor error handling en voegt die toe aan de lijst
      * Fouten worden afgehandeld door ze te printen naar het console
      * 
      * @param id
@@ -182,7 +176,7 @@ public class Agenda {
     {
         int pid = -1;
         try {
-          PeriodiekeAfspraak item = new PeriodiekeAfspraak(id, titel, datum, begintijd, eindtijd, periodiekId);
+          Item<PeriodiekeAfspraak> item = new Item<PeriodiekeAfspraak>(id, titel, datum, begintijd, eindtijd, periodiekId);
           pid = item.getId();
           items.add(item);
         } catch(NullPointerException e) {
@@ -226,19 +220,19 @@ public class Agenda {
     public int maakToDo(String titel, LocalDate datum) {
       int id = -1;
       try {
-        ToDo todo = new ToDo(getNextId(), titel, datum);
-        id = todo.getId();
-        items.add(todo);
+        Item<ToDo> item = new Item<ToDo>(getNextId(), titel, datum);
+        id = item.getId();
+        items.add(item);
       } 
       //er is geen GUI of iets waar we iets met fouten doen dus ik print ze maar naar het console
       catch(IllegalArgumentException e) {
-        System.out.println(e);
+        System.out.println(e.getMessage());
       } 
       catch(NullPointerException e) {
-        System.out.println(e);
+        System.out.println(e.getMessage());
       }
       catch(DatumVerledenException e) {
-        System.out.println(e);
+        System.out.println(e.getMessage());
       }
       return id;
     }
@@ -249,6 +243,7 @@ public class Agenda {
      *
      * @param id de id van de todo
      * @return true als status todo is gewijzigd van false naar true anders false
+     * @throws AgendaException 
      */
      /*@ @contract happy path {
      @     @requires lijst met agenda-items bevat een todo met de gezochte id;
@@ -259,12 +254,13 @@ public class Agenda {
      @     @assignable item met deze id
      @ }
      @*/
-    public boolean vinkToDoAf(int id) {
+    public boolean vinkToDoAf(int id) throws AgendaException  {
       try {
-        ToDo todo = getTodo(id);        
+        @SuppressWarnings("unchecked")
+        Item<ToDo> todo = (Item<ToDo>) getItem(id);    
         todo.vinkToDoAf();
         return true;
-      } catch(ReedsAfgevinktException e) {
+      }  catch(ReedsAfgevinktException e) {
         System.out.println(e.getMessage());
       } catch(NullPointerException e) {
         System.out.println("ToDo met id: " + id + " niet gevonden");
@@ -275,89 +271,41 @@ public class Agenda {
 
     /**
      * Geeft een kopie van alle afspraken of todo's in een bepaalde periode (begin- en einddatum)
+     * @param <T>
      *
      * @param begindatum de eerste datum van de periode
      * @param einddatum  de laatste datum van de periode (inclusief)
      * @return lijst met een kopie van alle items(afspraken of todo's) die vallen in de periode
+     * @throws AgendaException
      * van begindatum tot en met einddatum
      */
      /*@ @contract happy path {
      @     @requires begindatum ligt voor of op einddatum;
      @     @ensures \result = lijst met een kopie van alle items(afspraken of todo's) die vallen in de periode
      @                        van begindatum tot en met einddatum
+     @     @signal AgendaException als einddatum < begindatum
      @   }
      @*/
-    public List<AgendaItem> /*@ pure */ getItems(LocalDate begindatum, LocalDate einddatum) {
-      ArrayList<AgendaItem> gefilterdeitems = new ArrayList<>();
-      for(AgendaItem item: items) {
-        if((item.getDatum().isAfter(begindatum) || item.getDatum().isEqual(begindatum)) 
-            && (item.getDatum().isBefore(einddatum)) || item.getDatum().isEqual(einddatum)) {
-          try {
-            AgendaItem kopie = (AgendaItem) item.clone();           
+    @SuppressWarnings({
+        "rawtypes"
+    })
+    public List<Item> /*@ pure */ getItems(LocalDate begindatum, LocalDate einddatum) throws AgendaException {
+      
+      if(einddatum.isBefore(begindatum)) {
+        throw new AgendaException("Einddatum mag niet voor de begindatum liggen");
+      }
+      
+      List<Item> gefilterdeitems = new ArrayList<>();
+      for (Item item : items) {
+          
+          if((!item.getDatum().isBefore(begindatum)) && (!item.getDatum().isAfter(einddatum))) {
+            Item kopie = item.clone(); 
             gefilterdeitems.add(kopie);
-          } catch(CloneNotSupportedException e) {
-            System.out.println(e.getMessage());
           }
-        }
       }
       return gefilterdeitems;
     }
-    
-    
-    /**
-     * Geeft een kopie van alle afspraken of todo's in een bepaalde periode (begin- en einddatum)
-     * @param begindatum de eerste datum van de periode
-     * @param einddatum  de laatste datum van de periode (inclusief)
-     * @return lijst met een kopie van alle iafspraken die vallen in de periode
-     * van begindatum tot en met einddatum
-     */
-     /*@ @contract happy path {
-     @     @requires begindatum ligt voor of op einddatum;
-     @     @ensures \result = lijst met een kopie van alle items(afspraken of todo's) die vallen in de periode
-     @                        van begindatum tot en met einddatum
-     @   }
-     @*/
-    public List<Item> /*@ pure */ getAfspraken(LocalDate begindatum, LocalDate einddatum) {
-      List<AgendaItem> items = getItems(begindatum, einddatum);
-      ArrayList<Item> afspraken = new ArrayList<>();
-      for(AgendaItem item: items) {
-        if(item instanceof Item) {
-          try {
-            Item kopie = (Item) item.clone();           
-            afspraken.add(kopie);
-          } catch(CloneNotSupportedException e) {
-            System.out.println(e.getMessage());
-          }
-        }
-      }
-      return afspraken;
-    }
-    
-    /**
-     * Geeft een kopie van alle afspraken of todo's in een bepaalde periode (begin- en einddatum)
-     * @param begindatum de eerste datum van de periode
-     * @param einddatum  de laatste datum van de periode (inclusief)
-     * @return lijst met een kopie van alle PeriodiekeAfspraaken die vallen in de periode
-     * van begindatum tot en met einddatum
-     */
-     /*@ @contract happy path {
-     @     @requires begindatum ligt voor of op einddatum;
-     @     @ensures \result = lijst met een kopie van alle items(afspraken of todo's) die vallen in de periode
-     @                        van begindatum tot en met einddatum
-     @   }
-     @*/
-    public List<PeriodiekeAfspraak> /*@ pure */ getPeriodiekeAfspraken(LocalDate begindatum, LocalDate einddatum) {
-      List<AgendaItem> items = getItems(begindatum, einddatum);
-      ArrayList<PeriodiekeAfspraak> afspraken = new ArrayList<>();
-      for(AgendaItem item: items) {
-        if(item instanceof PeriodiekeAfspraak) {
-          PeriodiekeAfspraak kopie = (PeriodiekeAfspraak) item;
-          afspraken.add(kopie);
-        }
-      }
-      return afspraken;
-    }
-    
+      
 
     /**
      * Geeft een kopie van alle todo's op een gegeven datum, wel/niet afgevinkt.
@@ -372,39 +320,21 @@ public class Agenda {
      @    @ensures \result = een lijst met kopieen van alle todo's op bepaalde datum al dan niet  afgevinkt
      @ }
      @*/
-    
-    
-    
     public List<ToDo> /*@ pure */ getToDos(LocalDate datum, boolean afgevinkt)  {
       
-      ArrayList<ToDo> todos = new ArrayList<>();
-      for(AgendaItem item: items) {
-        if(item instanceof ToDo) {
-          try {
-            ToDo kopie = (ToDo) item.clone();            
-            if(kopie.getDatum().isEqual(datum) && kopie.getAfgevinkt() == afgevinkt) {
-              todos.add(kopie);
-            }
-          } catch(CloneNotSupportedException e) {
-            System.out.println(e.getMessage());
+      List<ToDo> todos = new ArrayList<>();
+      
+      for(@SuppressWarnings("rawtypes") Item item: items) {
+        if (item.getElm() instanceof ToDo) {
+          ToDo kopie = (ToDo) item.getElm().clone();
+          
+          if(datum.isEqual( kopie.getDatum()) && kopie.getAfgevinkt() == afgevinkt) {
+            todos.add(kopie);
           }
         }
-      }      
-      return todos;
-    }
-    
-    /**
-     * Gets ToDo met gegeven ID of null
-     * @param id
-     * @return de gevonden Todo instance of null
-     */
-    public ToDo /*@ pure */ getTodo(int id)  {
-      for(AgendaItem item: items) {
-        if(item instanceof ToDo && item.getId() == id) {
-          return (ToDo) item;
-        }
       }
-      return null; 
+    
+      return todos;
     }
   
 
@@ -418,15 +348,13 @@ public class Agenda {
      @     @requires true
      @     @ensures \result is een kopie van item met item.id == id of null als id niet voorkomt in de id's van items
      @*/
-    public Item /*@ pure */ getItem(int id) {
-      for(AgendaItem item: items) {
-        if(item instanceof Item && item.getId() == id) {
-          return (Item) item;
+    public Item<?> /*@ pure */ getItem(int id)  {
+      for(@SuppressWarnings("rawtypes") Item item: items) {
+        if(id == item.getId()) {
+          return (Item<?> )item.clone(); 
         }
       }
-      return null; 
+      return null;
     }
-    
-    
 
 }

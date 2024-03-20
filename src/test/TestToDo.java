@@ -12,9 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import agenda.AgendaItem;
 import agenda.PeriodiekeAfspraak;
 import agenda.ToDo;
-import exceptions.DatumVerledenException;
-import exceptions.ReedsAfgevinktException;
+import agenda.exceptions.DatumVerledenException;
+import agenda.exceptions.ReedsAfgevinktException;
 
+/**
+ * Tests de ToDo klasse
+ * @author carlo
+ *
+ */
 public class TestToDo {
   
   private ToDo t1;

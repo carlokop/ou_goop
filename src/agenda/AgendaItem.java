@@ -2,9 +2,15 @@ package agenda;
 
 import java.time.LocalDate;
 
-import exceptions.DatumVerledenException;
+import agenda.exceptions.DatumVerledenException;
+import agenda.interfaces.ItemInterface;
 
-public abstract class AgendaItem implements Cloneable {
+/**
+ * Abstracte klasse die informatie over agenda items bevat
+ * @author carlo
+ *
+ */
+public abstract class AgendaItem implements ItemInterface, Cloneable {
   
   private int id;
   private String titel;
@@ -18,15 +24,27 @@ public abstract class AgendaItem implements Cloneable {
    * @throws NullPointerException
    * @throws IllegalArgumentException
    * @throws DatumVerledenException 
+   * 
+   * @Contract happy
+   *  @requires titel niet null
+   *  @requires titel geen lege string
+   *  @required id > 0
+   *  @requires dat de einddatum bij creatie nog niet versteken is
+   *  @ensures dat id, titel en datum zijn ingesteld met niet lege of null waarden
+   *  @signal NullPointerException als titel == null
+   *  @signal IllegalArgumentException als titel is lege string
+   *  @signal IllegalArgumentException als id <= 0
+   *  @signal einddatumNogNietVerstreken als datum eerdfer dan vandaag was
+   *  
    */
   public AgendaItem(int id, String titel, LocalDate datum) 
       throws NullPointerException, IllegalArgumentException, DatumVerledenException 
   {
     if(titel == null) {
-      throw new NullPointerException("ToDo titel mag niet null zijn");
+      throw new NullPointerException("Titel mag niet null zijn");
     } 
     if(titel == "") {
-      throw new IllegalArgumentException("ToDo titel mag niet leeg zijn");
+      throw new IllegalArgumentException("Titel mag niet leeg zijn");
     } 
     if(id <= 0) {
       throw new IllegalArgumentException("ID moet een geheel getal groter dan 0 zijn maar was " + id);
@@ -43,6 +61,7 @@ public abstract class AgendaItem implements Cloneable {
   
   /**
    * String representatie van dit object
+   * deze moet geherfineerd worden in de subclasse
    * @return de inhoud van dit object
    */
   public abstract String toString();
@@ -52,10 +71,15 @@ public abstract class AgendaItem implements Cloneable {
    * @throws CloneNotSupportedException 
    */
   @Override
-  public Object clone() throws CloneNotSupportedException {
-    return super.clone();
+  public Object clone() {
+    try {
+      return super.clone();
+    } catch(CloneNotSupportedException e) {
+      System.out.println(e.getMessage()); 
+      return null;
+    }
+    
   }
-  
   
   /**
    * Gekozen einddatum is nog niet verstreken
@@ -66,8 +90,6 @@ public abstract class AgendaItem implements Cloneable {
     LocalDate nu = LocalDate.now();
     return datum.isAfter(nu) || datum.isEqual(nu);
   }
-  
-  
   
   /**
    * Geeft identifier

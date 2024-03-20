@@ -1,13 +1,17 @@
 package agenda;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import exceptions.DatumVerledenException;
-import exceptions.NietUniekeIdException;
+import agenda.exceptions.DatumVerledenException;
 
-public class PeriodiekeAfspraak extends Item {
+/**
+ * Maakt een PeriodiekeAfspraak instantie
+ * Deze klasse is een subklasse van de Afspraakklasse met als extra attribuut een periodiekItemId
+ * @author carlo
+ *
+ */
+public class PeriodiekeAfspraak extends Afspraak implements Cloneable {
   
   private int periodiekItemId;
   
@@ -15,12 +19,14 @@ public class PeriodiekeAfspraak extends Item {
   /**
    * Maakt een afspraak item
    * Deze wordt gekenmerkt met een begin datum en tijd en een eind datum en tijd
-   * @param id
+   * De periodiekeId verwijst naar meerdere periodieke items die bij elkaar horen
+   * 
+   * @param id unieke identifier
    * @param titel
    * @param datum
    * @param begintijd
    * @param eindtijd
-   * @param periodiekItemId
+   * @param periodiekItemId verscjhillende instanties voor dezelfde periodieke afspraak hebben dezelfde periodiekeId
    * @throws IllegalArgumentException 
    * @throws NullPointerException 
    * @throws DatumVerledenException 
@@ -73,11 +79,9 @@ public class PeriodiekeAfspraak extends Item {
    * @throws CloneNotSupportedException 
    */
   @Override
-  public PeriodiekeAfspraak clone() throws CloneNotSupportedException {
+  public PeriodiekeAfspraak clone() {
     PeriodiekeAfspraak item = (PeriodiekeAfspraak) super.clone();
-    
-    item.periodiekItemId = periodiekItemId;
-    return item;
+    return item;    
   }
   
   

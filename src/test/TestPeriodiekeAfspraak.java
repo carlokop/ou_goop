@@ -12,8 +12,13 @@ import java.time.Month;
 import org.junit.Test;
 
 import agenda.PeriodiekeAfspraak;
-import exceptions.DatumVerledenException;
+import agenda.exceptions.DatumVerledenException;
 
+/**
+ * Test de PeriodiekeAfspraak klasse
+ * @author carlo
+ *
+ */
 public class TestPeriodiekeAfspraak {
 
   private PeriodiekeAfspraak p1;

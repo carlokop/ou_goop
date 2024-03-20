@@ -1,17 +1,19 @@
 package agenda;
 
 import java.time.LocalDate;
+import java.util.List;
 
-import exceptions.DatumVerledenException;
-import exceptions.ReedsAfgevinktException;
+import agenda.exceptions.DatumVerledenException;
+import agenda.exceptions.ReedsAfgevinktException;
 
 
 /**
  * ToDo item 
+ * Deze klasse maakt een ToDo object 
  * @author carlo
  *
  */
-public class ToDo extends AgendaItem  {
+public class ToDo extends AgendaItem implements Cloneable  {
   
   private Boolean afgevinkt = false;
 
@@ -79,6 +81,18 @@ public class ToDo extends AgendaItem  {
         "Einddatum: " + getDatum() + "\n" +
         "Afgevinkt: " + afgevinkt + "\n";
   }
+  
+  /**
+   * Kopieert de instantie met diepe kloon
+   * @retun een kopie van de instantie
+   */
+  @Override
+  public ToDo clone() {
+    ToDo todo = (ToDo) super.clone();  
+    todo.afgevinkt = afgevinkt;
+    return todo;
+  }
+  
   
   
 

@@ -1,5 +1,5 @@
 
-package exceptions;
+package agenda.exceptions;
 
 /**
  * Deze exeptie opgooien als een todo reeds is afgevinkt
@@ -8,7 +8,7 @@ package exceptions;
  */
 public class ReedsAfgevinktException extends Exception{
 
-   /**
+   /*
    * Geen idee waarom dit nodig is
    */
   private static final long serialVersionUID = 1L;

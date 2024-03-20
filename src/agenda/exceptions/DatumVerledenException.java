@@ -1,5 +1,5 @@
 
-package exceptions;
+package agenda.exceptions;
 
 /**
  * Deze exeptie opgooien als er een datum of tijd wordt gekozen die in het verleden ligt

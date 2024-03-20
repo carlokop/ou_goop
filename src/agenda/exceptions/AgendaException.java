@@ -1,5 +1,11 @@
-package exceptions;
+package agenda.exceptions;
 
+/**
+ * Exceptie voor een algemene fout in de Agenda
+ * @author carlo
+ *
+ */
+@SuppressWarnings("serial")
 public class AgendaException extends Exception{
 
     public AgendaException(){

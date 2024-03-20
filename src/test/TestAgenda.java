@@ -1,6 +1,7 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -17,14 +18,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import agenda.Agenda;
-import agenda.AgendaItem;
-import agenda.PeriodiekeAfspraak;
 import agenda.Frequentie;
 import agenda.Item;
+import agenda.Afspraak;
 import agenda.ToDo;
-import exceptions.AgendaException;
-import exceptions.DatumVerledenException;
+import agenda.exceptions.AgendaException;
 
+/**
+ * Tests de Agende klasse
+ * @author carlo
+ *
+ */
 public class TestAgenda {
   
   private Agenda agenda;
@@ -47,7 +51,7 @@ public class TestAgenda {
     dt1 = LocalDateTime.of(d1,t1);
     dt2 = LocalDateTime.of(d2,t2);
   }
-
+  
   @Test
   public void maakTodoTest() {
     //happy
@@ -70,39 +74,44 @@ public class TestAgenda {
   }
   
   @Test 
-  public void getToDoTest() {
+  public void getToDoTest() throws CloneNotSupportedException {
     //krijgt todo
     int id = agenda.maakToDo("titel:", d1);
-    ToDo todo = agenda.getTodo(id);
+    @SuppressWarnings("unchecked")
+    Item<ToDo> todo = (Item<ToDo>) agenda.getItem(id);
     assertTrue(todo != null);
     assertEquals(todo.getTitel(),"titel:");
     assertEquals(todo.getId(),1);
     assertEquals(todo.getDatum().toString(),"2025-01-01");
-  }
+ }
   
   @Test
-  public void vinkTodoAfTest() {
+  public void vinkTodoAfTest() throws CloneNotSupportedException, AgendaException {
     //voeg 2 todos toe
     int id1 = agenda.maakToDo("titel", d1);
     int id2 =  agenda.maakToDo("titel", d1);
     
     //vink todo met gegeven id af
-    agenda.vinkToDoAf(1);
-    ToDo todo1 = agenda.getTodo(1);
-    ToDo todo2 = agenda.getTodo(2);
+    agenda.vinkToDoAf(id1);
+    @SuppressWarnings("unchecked")
+    Item<ToDo> todo1 = (Item<ToDo>) agenda.getItem(id1);
+    @SuppressWarnings("unchecked")
+    Item<ToDo> todo2 = (Item<ToDo>) agenda.getItem(id2);
     assertTrue(todo1.getAfgevinkt());
     assertFalse(todo2.getAfgevinkt());
     
     //vink 2x dezelfde af
     //voor dit project worden de meeste fouten in de agenda klasse afgehandeld om het systeem niet te laten crashen
     //ik heb op deze plek dan ook geen assertThrows maar er zou wel een system.out.print() zichtbaar moeten zijn.
-    agenda.vinkToDoAf(2);
+    agenda.vinkToDoAf(id1);
   }
   
   @Test
-  public void getToDosTest() {
+  public void getToDosTest() throws AgendaException {
     //lege array
-    ArrayList<ToDo> todos = (ArrayList<ToDo>) agenda.getToDos(d1, false);
+
+    //ArrayList<Item> todos = (ArrayList<Item>) agenda.getToDos(d1, false);
+    List<ToDo> todos = agenda.getToDos(d1, false);
     assertTrue(todos.size() == 0);
     
     //add 5 todos allen niet afgevinkt en zelfde datum
@@ -110,12 +119,12 @@ public class TestAgenda {
       agenda.maakToDo("titel: " +i, d1);
     }
     
-    todos = (ArrayList<ToDo>) agenda.getToDos(d1, false);
+    todos = agenda.getToDos(d1, false);
     assertTrue(todos.size() == 5);
     
     //andere datum
     agenda.maakToDo("titel: nieuwe datem", d2);
-    todos = (ArrayList<ToDo>) agenda.getToDos(d1, false);
+    todos = agenda.getToDos(d1, false);
     assertTrue(todos.size() == 5);
     
     todos = (ArrayList<ToDo>) agenda.getToDos(d2, false);
@@ -123,7 +132,7 @@ public class TestAgenda {
     
     //vink een af
     agenda.vinkToDoAf(1);
-    todos = (ArrayList<ToDo>) agenda.getToDos(d1, false);
+    todos = agenda.getToDos(d1, false);
     assertTrue(todos.size() == 4);
     
     ArrayList<ToDo> todosafgevinkt = (ArrayList<ToDo>) agenda.getToDos(d1, true);
@@ -131,31 +140,35 @@ public class TestAgenda {
     agenda.vinkToDoAf(2);
     todosafgevinkt = (ArrayList<ToDo>) agenda.getToDos(d1, true);
     assertTrue(todosafgevinkt.size() == 2);
-    
   }
   
+  @SuppressWarnings("unchecked")
   @Test
-  public void getItemTest() {
+  public void getItemTest() throws CloneNotSupportedException {
     int id = agenda.maakEenmaligeAfspraak("Titel", d1, t1, t2);
     
     //happy
-    Item item = agenda.getItem(id);
+    Item<Afspraak> item;
+    item = (Item<Afspraak>) agenda.getItem(id);
+    System.out.println(item.toString());
+    
     assertTrue(item != null);
     assertEquals(item.getTitel(),"Titel");
     assertEquals(item.getId(),1);
     assertEquals(item.getDatum().toString(),"2025-01-01");
     
-    item = agenda.getItem(-1);
+    item = (Item<Afspraak>) agenda.getItem(-1);
     assertNull(item);
   }
   
   @Test
-  public void maakEenmaligeAfspraakHappytest() {
+  public void maakEenmaligeAfspraakHappytest() throws CloneNotSupportedException {
     //maak afspraak instantie
     int id = agenda.maakEenmaligeAfspraak("Titel", d1, t1, t2);
     
     //getItem
-    Item item = agenda.getItem(id);
+    @SuppressWarnings("unchecked")
+    Item<Afspraak> item = (Item<Afspraak>) agenda.getItem(id);
     
     //zou geen exepties moeten opgooien wordt in de agenda klasse afgehandeld. Wel System.out.println()
     agenda.maakEenmaligeAfspraak(null, d1, t1, t2);
@@ -175,7 +188,7 @@ public class TestAgenda {
     agenda.maakEenmaligeAfspraak("Titel", d1, t1, t1);
     
     //datum vandaag maar begintijd al verstreken
-    LocalDateTime nu = Item.maakAfgerondeDateTime(LocalDateTime.now());
+    LocalDateTime nu = Afspraak.maakAfgerondeDateTime(LocalDateTime.now());
     LocalDate datenu = nu.toLocalDate();
     LocalTime uurgeleden = nu.toLocalTime().minusHours(1);
     LocalTime overeenuur = nu.toLocalTime().plusHours(1);
@@ -215,25 +228,13 @@ public class TestAgenda {
     assertTrue(list.size() == 9);
     assertEquals(list.toString(),"[22, 23, 24, 25, 26, 27, 28, 29, 30]");
     
-    
     //alle items incl todos
-    ArrayList<AgendaItem> items = (ArrayList<AgendaItem>) agenda.getItems(d1,d3);
+    List<?> items = (List<?>) agenda.getItems(d1,d3);
     assertTrue(items.size() == 30);
     
-    //alle afspraken en periodieke afspraken
-    ArrayList<Item> afspraken = (ArrayList<Item>) agenda.getAfspraken(d1,d3);
-    assertTrue(afspraken.size() == 25);
-    
-    ArrayList<PeriodiekeAfspraak> periodiekeAfspraken = (ArrayList<PeriodiekeAfspraak>) agenda.getPeriodiekeAfspraken(d1,d3);
-    assertTrue(periodiekeAfspraken.size() == 14);
-    
-        
+    //einddatm voor begindatum
+    assertThrows(AgendaException.class, () -> { agenda.getItems(d3,d1); });
+            
   }
-  
 
-  
-  
-  
-  
-
-} //class
+} 
