@@ -1,5 +1,6 @@
 package agenda;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -12,24 +13,22 @@ import java.time.LocalDateTime;
  * @author carlo
  *
  */
-public class Afspraak extends AgendaItem implements Cloneable {
+public class Afspraak extends Item implements Cloneable {
   
   private LocalDate datum;
   private LocalTime begintijd;
   private LocalTime eindtijd;
 
   /**
-   * Maakt een afspraak item
+   * Maakt een afspraak 
    * Deze wordt gekenmerkt met een begin datum en tijd en een eind datum en tijd
    * @param id unieke identifier
    * @param titel de titel van de afspraak
    * @param datum de datum waarop de afspraak plaatsvindt
    * @param begintijd de tijd waarop de afspraak begint
    * @param eindtijd de tijd waarop de afspraak eindigt 
-   * @throws NullPointerException       null waarde meegegeven
-   * @throws IllegalArgumentException   Ongeldige waarde meegegeven
-   * @throws IllegalStateException      Ongeldige state meegegeven
-   * @throws DatumVerledenException     Gekozen datum ligt in het verleden
+   * @throws AgendaException            Er is een foutive invoerwaarde gegeven
+   * @throws DateTimeException          Er is een ongeldige datum of tijd ingevoerd
    */
    /*@
    @  @contract happy {
@@ -40,15 +39,24 @@ public class Afspraak extends AgendaItem implements Cloneable {
    @   @ensures alle attributen zijn set 
    @   @ensures eind datum en tijd ligt na het begin
    @   @assignable id, titel, datum, begintijd, eindtijd
-   @   @signals IllegalArgumentException bij lege String titel
-   @   @signals NullPointerException bij titel of een datum of tijden = null
-   @   @signals IllegalStateException bij datum / tijd combinatie in het verleden
-   @   @signals IllegalStateException bij eindtijd die voor het begin ligt
-   @   @signals DatumVerledenException bij begintijd in het verleden
-   @ }*/
-  public Afspraak(int id, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd) 
-    throws NullPointerException, IllegalArgumentException, IllegalStateException, DatumVerledenException 
-  {
+   @ }
+   @ @Contract datum of tijd verstreken {
+   @  @requires datum == vandaag & begintijd < huidige tijd in hele minuten is reeds verstreken 
+   @  @assignable niets
+   @  @signals (DateTimeException e) e.getMessage().equals("Datum en of tijd is reeds verstreken");    
+   @ } 
+   @ @Contract einde voor begin {
+   @  @requires begintijd > eindtijd
+   @  @assignable niets
+   @  @signals (DateTimeException e) e.getMessage().equals("De eindtijd mag niet voor het begin liggen");    
+   @ } 
+   @ @Contract begin en eindtijd gelijk {
+   @  @requires begintijd == eindtijd
+   @  @assignable niets
+   @  @signals (DateTimeException e) e.getMessage().equals("De begin en einddatum en tijd mogen niet op hetzelfde moment liggen");    
+   @ } 
+   */
+  public Afspraak(int id, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd) throws AgendaException, DateTimeException {
     super(id,titel, datum); 
 
     Afspraak.checkGeldigeDateTime(datum,begintijd,eindtijd);    
@@ -63,33 +71,32 @@ public class Afspraak extends AgendaItem implements Cloneable {
    * @param eindDatum                   na deze datum mogen geen nieuwe afspraken gemaakt worden
    * @param begintijd                   de tijd waarop de afspraak begint
    * @param eindtijd                    de tijd waarop de afspraak eindigt
-   * @throws IllegalStateException      Ongeldige begin en eindtijd
-   * @throws DatumVerledenException     Datum is in het verledn
+   * @throws DateTimeException          Ongeldige datum en of tijden ingevoerd
    */
   private static void checkGeldigeDateTime(LocalDate datum, LocalTime begintijd, LocalTime eindtijd) 
-      throws DatumVerledenException, IllegalStateException, DatumVerledenException 
+      throws DateTimeException 
   {
     
     //Bugfix: Er leek een heel klein verschil (enkele nanoseconden) te zitten tussen begin en LocalDateTime.now() 
     //terwijl die in de testklasse ook door LocalDateTime.now() wordt gemaakt 
-    //Dit rond de tijden af op hele minuten. Dat is goed voor deze
-    LocalDateTime nu = maakAfgerondeDateTime(LocalDateTime.now());
-    LocalDateTime begin = Afspraak.maakAfgerondeDateTime(datum, begintijd);
+    //Dit rond de tijden af op hele minuten. 
+    LocalDateTime nu;
+    LocalDateTime begin = Afspraak.maakAfgerondeDateTime(datum,begintijd);
     LocalDateTime einde = Afspraak.maakAfgerondeDateTime(datum,eindtijd);
     
-    //begin in het verleden
+    nu = maakAfgerondeDateTime(LocalDateTime.now());
     if(begin.isBefore(nu)) {
-      throw new DatumVerledenException("Je kunt geen afspraak in het verleden maken");
+      throw new DateTimeException("Datum en of tijd is reeds verstreken");
     }
     
     //einddatum < begindatum
     if(einde.isBefore(begin)) {
-      throw new IllegalStateException("De einddatum mag niet voor de begindatum liggen");
+      throw new DateTimeException("De eindtijd mag niet voor het begin liggen");
     }
     
     //zelfde dag en zelfde tijd
     if(einde.isEqual(begin)) {
-      throw new IllegalStateException("De begin en einddatum en tijd mogen niet op hetzelfde moment liggen");
+      throw new DateTimeException("De begin en einddatum en tijd mogen niet op hetzelfde moment liggen");
     }
     
   }
@@ -102,7 +109,7 @@ public class Afspraak extends AgendaItem implements Cloneable {
    * @param time    tijd object
    * @return LocalDateTime object afgerond naar beneden met hele minuten
    */
-  public static LocalDateTime maakAfgerondeDateTime(LocalDate date, LocalTime time) {
+  private static LocalDateTime maakAfgerondeDateTime(LocalDate date, LocalTime time) {
     int uren = time.getHour();
     int min = time.getMinute();
     LocalTime aangepastetijd = LocalTime.of(uren, min);
@@ -116,7 +123,7 @@ public class Afspraak extends AgendaItem implements Cloneable {
    * @param datetime    datetime object
    * @return LocalDateTime object afgerond naar beneden op hele minuten
    */
-  public static LocalDateTime maakAfgerondeDateTime(LocalDateTime datetime) {
+  private static LocalDateTime maakAfgerondeDateTime(LocalDateTime datetime) {
     LocalDate date = datetime.toLocalDate();
     int uren = datetime.toLocalTime().getHour();
     int min = datetime.toLocalTime().getMinute();
@@ -127,21 +134,30 @@ public class Afspraak extends AgendaItem implements Cloneable {
   /**
    * Maakt een diepe kloon van dit object
    * Begin en eindtijden worden tot duizenste van een seconden nauwkeurig gekopieerds
+   * @return een diepe kloon van dit object
+   * /*@ @contract happy path {
+     @     @requires true;
+     @     @ensures \result = een kopie van het object zonder referentie
+     @ }
    */
   @Override
   public Afspraak clone() {
     Afspraak item = (Afspraak) super.clone();
     
-    //Diepe kloon datum en tijd 
-    LocalDate begind = LocalDate.of(datum.getYear(), datum.getMonth(), datum.getDayOfMonth());
-    LocalTime begint = LocalTime.of(begintijd.getHour(), begintijd.getMinute(), begintijd.getSecond(), begintijd.getNano());
-    LocalTime eindt = LocalTime.of(eindtijd.getHour(), eindtijd.getMinute(), eindtijd.getSecond(), eindtijd.getNano());
-   
-    item.begintijd = begint;
-    item.datum = begind;
-    item.eindtijd = eindt;
+    if(item != null) {
+      //Diepe kloon datum en tijd 
+      LocalDate begind = LocalDate.of(datum.getYear(), datum.getMonth(), datum.getDayOfMonth());
+      LocalTime begint = LocalTime.of(begintijd.getHour(), begintijd.getMinute(), begintijd.getSecond(), begintijd.getNano());
+      LocalTime eindt = LocalTime.of(eindtijd.getHour(), eindtijd.getMinute(), eindtijd.getSecond(), eindtijd.getNano());
+     
+      item.begintijd = begint;
+      item.datum = begind;
+      item.eindtijd = eindt;
+    }
+    
     return item;
   }
+  
   
   /**
    * Geeft string representie van begin en eind datum en tijd
@@ -150,7 +166,6 @@ public class Afspraak extends AgendaItem implements Cloneable {
   @Override
   public String toString() {
     return "\n" + 
-        "\n" + 
         "ID: " + getId() + "\n" +
         "Titel: " + getTitel() + "\n" +
         "Begindatum: " + datum.toString() + "\n" +

@@ -1,11 +1,11 @@
 package agenda;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import agenda.exceptions.AgendaException;
 import agenda.exceptions.DatumVerledenException;
 import agenda.exceptions.ReedsAfgevinktException;
 
@@ -19,7 +19,6 @@ import agenda.exceptions.ReedsAfgevinktException;
 public class Agenda {
 	
     private int nextId = 0;
-    @SuppressWarnings("rawtypes")
     private ArrayList<Item> items;
     
     /**
@@ -64,25 +63,54 @@ public class Agenda {
      @   @assignable nextId
      @   @assignable items
      @ }
+     @ @Contract titel leeg {
+     @  @requires titel == "" 
+     @  @ensures \result = -1
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId
+     @ } 
+     @ @Contract datum verstreken {
+     @  @requires datum in het verleden 
+     @  @ensures \result = -1
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId  
+     @ }
+     @ @Contract datum of tijd verstreken {
+     @  @requires datum == vandaag
+     @  @requires begintijd < huidige tijd in hele minuten is reeds verstreken
+     @  @ensures \result = -1 
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId
+     @ } 
+     @ @Contract einde vaar begin {
+     @  @requires begintijd > eindtijd
+     @  @ensures \result = -1
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId 
+     @ } 
+     @ @Contract begin en eindtijd gelijk {
+     @  @requires begintijd == eindtijd
+     @  @ensures \result = -1
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId    
+     @ } 
      @*/
-    @SuppressWarnings("finally")
     public int maakEenmaligeAfspraak(String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd)   {
       int id = -1;
       try {
-        Item<Afspraak> item = new Item<Afspraak>(getNextId(), titel, datum, begintijd, eindtijd);
-        items.add(item);
-        id = item.getId();
-      } catch(NullPointerException e) {
-        System.out.println(e.getMessage());
-      } catch(IllegalArgumentException e) {
-        System.out.println(e.getMessage());
-      } catch(IllegalStateException e) {
-        System.out.println(e.getMessage());
-      } catch(DatumVerledenException e) {
-        System.out.println(e.getMessage());
-      } finally {
-        return id;
+        Afspraak afspraak = new Afspraak(getNextId(), titel, datum, begintijd, eindtijd);
+        id = afspraak.getId();
+        if(id > 0) {
+          items.add(afspraak);
+        }
+      } catch(AgendaException e) {
+        nextId--;
+        //doen hier niets?
+      } catch(DateTimeException e) {
+        nextId--;
+        //doen hier niets?
       }
+      return id;
     }
 
     /**
@@ -96,7 +124,6 @@ public class Agenda {
      * @param eindtijd          de tijd waarop de afspraak eindigt
      * @param frequentie        de periode tussen twee afspraken (Zie enum Frequentie)
      * @return een lijst met id's van de gegenereerde afspraken
-     * @throws AgendaException  AgendaFout
      */
      /*@ @contract happy path {
      @     @requires titel mag geen lege string zijn
@@ -109,90 +136,70 @@ public class Agenda {
      @     @ensures \result = lijst van id’s die  bij gegenereerde afspraken horen
      @     @assignable items
      @ }
-     @*/
+     @ @Contract titel leeg {
+     @  @requires titel == "" 
+     @  @ensures \result = lege lijst
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId
+     @ } 
+     @ @Contract begindatum verstreken {
+     @  @requires begindatum in het verleden 
+     @  @ensures \result = lege lijst
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId  
+     @ }
+     @ @Contract begindatum is vandaag maar begintijd verstreken {
+     @  @requires datum == vandaag
+     @  @requires begintijd < huidige tijd in hele minuten is reeds verstreken
+     @  @ensures \result = lege lijst 
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId
+     @ } 
+     @ @Contract einddatum voor begindatum {
+     @  @requires einddatum < begindatum
+     @  @ensures \result = lege lijst
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId 
+     @ } 
+     @ @Contract begin en eindtijd gelijk {
+     @  @requires begintijd == eindtijd
+     @  @ensures \result = lege lijst
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId    
+     @ } 
+     @ @Contract eindtijd ligt voor de begintijd {
+     @  @requires eindtijd < begintijd
+     @  @ensures \result = lege lijst
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId    
+     @ } 
+    @*/
     public List<Integer> maakPeriodiekeAfspraak(String titel,
                                                 LocalDate begindatum, LocalDate einddatum,
                                                 LocalTime begintijd, LocalTime eindtijd,
-                                                Frequentie frequentie) throws AgendaException  {
-      
+                                                Frequentie frequentie)   {
+
       ArrayList<Integer> ids = new ArrayList<>();
       LocalDate datum = LocalDate.of(begindatum.getYear(), begindatum.getMonth(), begindatum.getDayOfMonth());
       
-      int periodiekId = -1;
       while(!datum.isAfter(einddatum)) {
         
-        if(!datum.isAfter(einddatum)) {
-          
-          if(periodiekId == -1) {
-            //de eerste periodieke afspraak heeft een periodiekid == id
-            //volgende periodieke afspraken hebben de periodiekeid die gelijk is aan id van de afspraak op de begindatum
-            int id = getNextId();
-            periodiekId = handleMaakPeriodiekeAfspraak(id, titel, datum, begintijd,  eindtijd, id);
-            ids.add(periodiekId);
-          } else {
-            //volgende periodieke afspraken hebben periodiekid == de id van de 1e afspraak
-            int id = handleMaakPeriodiekeAfspraak(getNextId(), titel, datum, begintijd,  eindtijd, periodiekId);
-            if(id == -1) {
-              //niet helemaal duidelijk waarom we in deze klasse fouten ofgooien
-              //deze fout wordt niet afgehandeld in de main
-              throw new AgendaException("Periodieke afspraak kon niet worden gemaakt");
-            } else {
-              ids.add(id);
-            }
-          }
-          
+        //maakEenmaligeAfspraak voor deze datum
+        //voeg id toe aan lijst
+        int id = maakEenmaligeAfspraak(titel, datum, begintijd, eindtijd);
+        if(id > 0) {
+          ids.add(id);
+        } else {
+          break;
         }
         datum = frequentie.volgendeDatum(datum);
+        
       }
 
       return ids;
       
     }
-    
-    /**
-     * Maakt een periodieke item en zorgt voor error handling en voegt die toe aan de lijst
-     * Fouten worden afgehandeld door ze te printen naar het console
-     * 
-     * @param id
-     * @param titel
-     * @param datum
-     * @param begintijd
-     * @param eindtijd
-     * @param periodiekId
-     * @return de item id deze is -1 als er fouten waren
-     */ 
-     /*@
-     @  @Contract nieuw Periodiekitem happy path {
-     @   @requires string != null of gen lege string
-     @   @requires id en periodiekId > 0
-     @   @requires datum en tijden not null
-     @   @requires dat allen gegeven datum en tijden in de toekomst liggen 
-     @   @requires dat de eindtijd na de begintijd ligt
-     @   @ensures dat een periodiek item instantie is creert en toegevoegd aan de items
-     @   @assignable items
-     @ }*/
-    @SuppressWarnings("finally")
-    private int handleMaakPeriodiekeAfspraak(int id, String titel, LocalDate datum, LocalTime begintijd, LocalTime eindtijd, int periodiekId) 
-    {
-        int pid = -1;
-        try {
-          Item<PeriodiekeAfspraak> item = new Item<PeriodiekeAfspraak>(id, titel, datum, begintijd, eindtijd, periodiekId);
-          pid = item.getId();
-          items.add(item);
-        } catch(NullPointerException e) {
-          System.out.println(e.getMessage());
-        } catch(IllegalArgumentException e) {
-          System.out.println(e.getMessage());
-        } catch(IllegalStateException e) {
-          System.out.println(e.getMessage());
-        } catch(DatumVerledenException e) {
-          System.out.println(e.getMessage());
-        } finally {
-          return pid;
-        }
-    } 
-
-   
+       
 
     /**
      * Maakt een todo en voegt deze toe aan de agenda.
@@ -211,23 +218,36 @@ public class Agenda {
      @     @assignable nextId
      @     @assignable items
      @ }
+     @ @Contract titel leeg {
+     @  @requires titel == "" 
+     @  @ensures \result = lege lijst
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId
+     @ } 
+     @ @Contract datum verstreken {
+     @  @requires datum in het verleden 
+     @  @ensures \result = lege lijst
+     @  @ensures nextId blijft onveranderd
+     @  @assignable nextId  
+     @ }
+
      @*/
     public int maakToDo(String titel, LocalDate datum) {
       int id = -1;
       try {
-        Item<ToDo> item = new Item<ToDo>(getNextId(), titel, datum);
+        ToDo item = new ToDo(getNextId(), titel, datum);
         id = item.getId();
-        items.add(item);
+        if(id > 0) {
+          items.add(item);
+        }
       } 
-      //er is geen GUI of iets waar we iets met fouten doen dus ik print ze maar naar het console
-      catch(IllegalArgumentException e) {
-        System.out.println(e.getMessage());
+      catch(DateTimeException e) {
+        nextId--;
+        //doen hier niets?
       } 
-      catch(NullPointerException e) {
-        System.out.println(e.getMessage());
-      }
-      catch(DatumVerledenException e) {
-        System.out.println(e.getMessage());
+      catch(AgendaException e) {
+        nextId--;
+        //doen hier niets?
       }
       return id;
     }
@@ -238,7 +258,6 @@ public class Agenda {
      *
      * @param id                de id van de todo
      * @return true als status todo is gewijzigd van false naar true anders false
-     * @throws AgendaException  Er was een fout in de agenda
      */
      /*@ @contract happy path {
      @     @requires lijst met agenda-items bevat een todo met de gezochte id;
@@ -248,19 +267,30 @@ public class Agenda {
      @     @assignable items
      @     @assignable item met deze id
      @ }
+     @ @contract id onjuist {
+     @     @requires er is geen todo met gegeven id
+     @     @ensures \result = false
+     @     @assignable geen
+     @ }
+     @ @contract toDo reeds afgevinkt {
+     @     @requires afgevinkt == true
+     @     @ensures \result = false
+     @ }
      @*/
-    public boolean vinkToDoAf(int id) throws AgendaException  {
+    public boolean vinkToDoAf(int id)   {
+      boolean status = false;
       try {
-        @SuppressWarnings("unchecked")
-        Item<ToDo> todo = (Item<ToDo>) getItem(id);    
-        todo.vinkToDoAf();
-        return true;
-      }  catch(ReedsAfgevinktException e) {
-        System.out.println(e.getMessage());
-      } catch(NullPointerException e) {
-        System.out.println("ToDo met id: " + id + " niet gevonden");
+        
+        for(Item item: items) {
+          if(item instanceof ToDo && item.getId() == id) {
+            ((ToDo) item).vinkToDoAf();
+            status = true;
+          }
+        }
+      }   catch (AgendaException e) {
+        //doen hier niets?
       }
-      return false;
+      return status;
     }
     
 
@@ -269,29 +299,25 @@ public class Agenda {
      * @param begindatum        De eerste datum van de periode
      * @param einddatum         De laatste datum van de periode (inclusief)
      * @return lijst met een kopie van alle items(afspraken of todo's) die vallen in de periode
-     * @throws AgendaException  Algemene agendafout
      */
      /*@ @contract happy path {
      @     @requires begindatum ligt voor of op einddatum;
      @     @ensures \result = lijst met een kopie van alle items(afspraken of todo's) die vallen in de periode
      @                        van begindatum tot en met einddatum
-     @     @signal AgendaException als einddatum < begindatum
+     @   }
+     @ @contract happy path {
+     @     @requires einddatum ligt na de begindatum;
+     @     @ensures \result = lege lijst
      @   }
      @*/
-    @SuppressWarnings({
-        "rawtypes"
-    })
-    public List<Item> /*@ pure */ getItems(LocalDate begindatum, LocalDate einddatum) throws AgendaException {
+    public List<Item> /*@ pure */ getItems(LocalDate begindatum, LocalDate einddatum)  {
       
-      if(einddatum.isBefore(begindatum)) {
-        throw new AgendaException("Einddatum mag niet voor de begindatum liggen");
-      }
       
       List<Item> gefilterdeitems = new ArrayList<>();
       for (Item item : items) {
           
           if((!item.getDatum().isBefore(begindatum)) && (!item.getDatum().isAfter(einddatum))) {
-            Item kopie = item.clone(); 
+            Item kopie = (Item) item.clone(); 
             gefilterdeitems.add(kopie);
           }
       }
@@ -316,10 +342,9 @@ public class Agenda {
       
       List<ToDo> todos = new ArrayList<>();
       
-      for(@SuppressWarnings("rawtypes") Item item: items) {
-        if (item.getElm() instanceof ToDo) {
-          ToDo kopie = (ToDo) item.getElm().clone();
-          
+      for( Item item: items) {
+        if (item instanceof ToDo) {
+          ToDo kopie = (ToDo) item.clone();
           if(datum.isEqual( kopie.getDatum()) && kopie.getAfgevinkt() == afgevinkt) {
             todos.add(kopie);
           }
@@ -336,14 +361,22 @@ public class Agenda {
      * @param id de id van het item
      * @return een kopie van het gevonden item of null
      */
-     /*@ @contract happy path
+     /*
+     @  @ @contract happy path {
      @     @requires true
      @     @ensures \result is een kopie van item met item.id == id of null als id niet voorkomt in de id's van items
-     @*/
-    public Item<?> /*@ pure */ getItem(int id)  {
-      for(@SuppressWarnings("rawtypes") Item item: items) {
+     @ }
+     @  @ @contract id onbekend {
+     @     @requires er is geen item met gegeven id in de lijst
+     @     @ensures \result null
+     @ }
+     */
+    public Item /*@ pure */ getItem(int id)  {
+      for(Item item: items) {
         if(id == item.getId()) {
-          return (Item<?> )item.clone(); 
+
+          return (Item) item.clone();
+          
         }
       }
       return null;

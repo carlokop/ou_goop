@@ -1,4 +1,4 @@
-package agenda.exceptions;
+package agenda;
 
 /**
  * Exceptie voor een algemene fout in de Agenda

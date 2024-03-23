@@ -1,5 +1,6 @@
 package agenda;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -13,19 +14,18 @@ import agenda.exceptions.ReedsAfgevinktException;
  * @author carlo
  *
  */
-public class ToDo extends AgendaItem implements Cloneable  {
+public class ToDo extends Item implements Cloneable  {
   
-  private Boolean afgevinkt = false;
+  private boolean afgevinkt = false;
 
 
   /**
    * Maakt ToDo item
    * @param id                          identificerende element mag negatief zijn
    * @param titel                       de titel
-   * @param eindDatum                   de datum
-   * @throws NullPointerException       null waarde meegegeven
-   * @throws IllegalArgumentException   Ongeldige waarde meegegeven
-   * @throws DatumVerledenException     Gekozen datum ligt in het verleden
+   * @param datum                       de datum
+   * @throws AgendaException            Er is ongeldige actie uitgevoerd of onjuiste invoer
+   * @throws DateTimeException          Er is een datum in het verleden ingevoerd
    */
   /*
    @ @Contract Geldige invoer {
@@ -38,33 +38,38 @@ public class ToDo extends AgendaItem implements Cloneable  {
    @  @signal IllegalArgumentException bij lege String titel
    @  @signal NullPointerException bij tittel of LocalDateTime = null
    @  @signal DatumVerledenException bij einddatum in het verleden
-   @} */
-  public ToDo(int id, String titel, LocalDate eindDatum) throws IllegalArgumentException, NullPointerException, DatumVerledenException {
-    super(id,titel, eindDatum);      
+   @}
+   */
+  public ToDo(int id, String titel, LocalDate datum) throws DateTimeException, AgendaException {
+    super(id,titel, datum);      
   }
   
   /**
    * Todo is afgevinkt
    * @return ToDo is afgevinkt
    */
-  public Boolean getAfgevinkt() {
+  public boolean getAfgevinkt() {
     return afgevinkt;
   }
   
   /**
    * Vinkt todo af als deze nog niet afgevinkt is
-   * @throws ReedsAfgevinktException    Todo instance is al afgevinkt
+   * @throws AgendaException    Todo instance is al afgevinkt
    */
   /*
-   @ @Contract vinkaf {
+   @ @Contract happy {
    @  @requires afgevinkt == false
-   @  @ensures afgevinkt == true
-   @*  @assignable afgevinkt
-   @  @signals ReedsAfgevinktException   Todo instance is al afgevinkt
+   @  @ensures afgevinkt = true
+   @  @assignable afgevinkt
+   @ }
+   @  @Contract reeds afgevinkt
+   @   @requires afgevinkt == true
+   @   @assignable geen
+   @   @signals (AgendaException e) e.getMessage().equals("ToDo is reeds afgevinkt");
    @ } */
-  public void vinkToDoAf() throws ReedsAfgevinktException {
+  public void vinkToDoAf() throws AgendaException {
     if(afgevinkt) {
-      throw new ReedsAfgevinktException("ToDo is reeds afgevinkt");
+      throw new AgendaException("ToDo is reeds afgevinkt");
     }
     afgevinkt = true;
   }
@@ -76,7 +81,6 @@ public class ToDo extends AgendaItem implements Cloneable  {
   @Override
   public String toString() {
     return "\n" + 
-        "\n" +
         "ID: " + getId() + "\n" +
         "Titel: " + getTitel() + "\n" +
         "Einddatum: " + getDatum() + "\n" +
@@ -90,9 +94,13 @@ public class ToDo extends AgendaItem implements Cloneable  {
   @Override
   public ToDo clone() {
     ToDo todo = (ToDo) super.clone();  
-    todo.afgevinkt = afgevinkt;
+    if(todo != null) {
+      todo.afgevinkt = afgevinkt; 
+    }
     return todo;
   }
+  
+
   
   
   
