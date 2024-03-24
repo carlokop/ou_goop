@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * @author carlo
  *
  */
-public class Afspraak extends Item implements Cloneable {
+public class Afspraak extends Item {
   
   private LocalDate datum;
   private LocalTime begintijd;
@@ -63,6 +63,17 @@ public class Afspraak extends Item implements Cloneable {
     this.begintijd = begintijd;
     this.datum = datum;
     this.eindtijd = eindtijd;
+  }
+  
+  /**
+   * Copy constructor maakt een kopie van het meegegeven object
+   * @param item    object wat gekopieerd moet worden
+   */
+  public Afspraak(Afspraak object) {
+    super(object);
+    this.datum = object.datum;
+    this.begintijd = object.begintijd;
+    this.eindtijd = object.eindtijd;
   }
   
   /**
@@ -140,23 +151,23 @@ public class Afspraak extends Item implements Cloneable {
      @     @ensures \result = een kopie van het object zonder referentie
      @ }
    */
-  @Override
-  public Afspraak clone() {
-    Afspraak item = (Afspraak) super.clone();
-    
-    if(item != null) {
-      //Diepe kloon datum en tijd 
-      LocalDate begind = LocalDate.of(datum.getYear(), datum.getMonth(), datum.getDayOfMonth());
-      LocalTime begint = LocalTime.of(begintijd.getHour(), begintijd.getMinute(), begintijd.getSecond(), begintijd.getNano());
-      LocalTime eindt = LocalTime.of(eindtijd.getHour(), eindtijd.getMinute(), eindtijd.getSecond(), eindtijd.getNano());
-     
-      item.begintijd = begint;
-      item.datum = begind;
-      item.eindtijd = eindt;
-    }
-    
-    return item;
-  }
+//  @Override
+//  public Afspraak clone() {
+//    Afspraak item = (Afspraak) super.clone();
+//    
+//    if(item != null) {
+//      //Diepe kloon datum en tijd 
+//      LocalDate begind = LocalDate.of(datum.getYear(), datum.getMonth(), datum.getDayOfMonth());
+//      LocalTime begint = LocalTime.of(begintijd.getHour(), begintijd.getMinute(), begintijd.getSecond(), begintijd.getNano());
+//      LocalTime eindt = LocalTime.of(eindtijd.getHour(), eindtijd.getMinute(), eindtijd.getSecond(), eindtijd.getNano());
+//     
+//      item.begintijd = begint;
+//      item.datum = begind;
+//      item.eindtijd = eindt;
+//    }
+//    
+//    return item;
+//  }
   
   
   /**
@@ -165,12 +176,7 @@ public class Afspraak extends Item implements Cloneable {
    */
   @Override
   public String toString() {
-    return "\n" + 
-        "ID: " + getId() + "\n" +
-        "Titel: " + getTitel() + "\n" +
-        "Begindatum: " + datum.toString() + "\n" +
-        "Begintijd: " + begintijd.toString() + "\n" +
-        "Eindtijd: " + eindtijd.toString();
+    return "" + getId() + ", " + datum.toString() + ", " + getTitel() + ", van " + begintijd.toString() + " " + eindtijd.toString();
   }
   
   /**

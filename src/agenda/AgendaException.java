@@ -1,12 +1,11 @@
 package agenda;
 
-/**
- * Exceptie voor een algemene fout in de Agenda
- * @author carlo
- *
- */
-@SuppressWarnings("serial")
 public class AgendaException extends Exception{
+
+    /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
     public AgendaException(){
         super();

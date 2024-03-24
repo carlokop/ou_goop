@@ -76,7 +76,7 @@ public class TestAfspraak {
     assertEquals("12:00",i1.getEindtijd().toString());
     
     //maak diepe kloon
-    Afspraak clone = i1.clone();
+    Afspraak clone = new Afspraak(i1);
     assertEquals("Afspraak",clone.getTitel());
     assertEquals(1,clone.getId());
     assertEquals("2024-06-14",clone.getDatum().toString());

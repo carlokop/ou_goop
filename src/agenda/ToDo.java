@@ -14,7 +14,7 @@ import agenda.exceptions.ReedsAfgevinktException;
  * @author carlo
  *
  */
-public class ToDo extends Item implements Cloneable  {
+public class ToDo extends Item  {
   
   private boolean afgevinkt = false;
 
@@ -42,6 +42,15 @@ public class ToDo extends Item implements Cloneable  {
    */
   public ToDo(int id, String titel, LocalDate datum) throws DateTimeException, AgendaException {
     super(id,titel, datum);      
+  }
+  
+  /**
+   * Copy constructor maakt een kopie van het meegegeven object
+   * @param item    object wat gekopieerd moet worden
+   */
+  public ToDo(ToDo object) {
+    super(object);
+    this.afgevinkt = object.afgevinkt;
   }
   
   /**
@@ -80,25 +89,21 @@ public class ToDo extends Item implements Cloneable  {
    */
   @Override
   public String toString() {
-    return "\n" + 
-        "ID: " + getId() + "\n" +
-        "Titel: " + getTitel() + "\n" +
-        "Einddatum: " + getDatum() + "\n" +
-        "Afgevinkt: " + afgevinkt + "\n";
+    return "" + getId() + ", " + getDatum().toString() + ", " + getTitel() + ", afgevinkt: " + afgevinkt;
   }
   
   /**
    * Kopieert de instantie met diepe kloon
    * @return een kopie van de instantie
    */
-  @Override
-  public ToDo clone() {
-    ToDo todo = (ToDo) super.clone();  
-    if(todo != null) {
-      todo.afgevinkt = afgevinkt; 
-    }
-    return todo;
-  }
+//  @Override
+//  public ToDo clone() {
+//    ToDo todo = (ToDo) super.clone();  
+//    if(todo != null) {
+//      todo.afgevinkt = afgevinkt; 
+//    }
+//    return todo;
+//  }
   
 
   

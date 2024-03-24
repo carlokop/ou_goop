@@ -11,7 +11,7 @@ import agenda.interfaces.ItemInterface;
  * @author carlo
  *
  */
-public abstract class Item implements Cloneable {
+public abstract class Item {
   
   private int id;
   private String titel;
@@ -57,7 +57,8 @@ public abstract class Item implements Cloneable {
     if(titel == null) {
       throw new AgendaException("Titel mag niet null zijn");
     } 
-    if(titel == "") {
+    //titel is lege string of alleen spaties
+    if(titel.trim().isEmpty()) {
       throw new AgendaException("Titel mag niet leeg zijn");
     } 
     if(id <= 0) {
@@ -74,6 +75,16 @@ public abstract class Item implements Cloneable {
   }
   
   /**
+   * Copy constructor maakt een kopie van het meegegeven object
+   * @param item    object wat gekopieerd moet worden
+   */
+  public Item(Item item) {
+    this.id = item.id;
+    this.titel = item.titel;
+    this.datum = item.datum;
+  }
+  
+  /**
    * String representatie van dit object
    * deze moet geherfineerd worden in de subclasse
    * @return de inhoud van dit object
@@ -85,14 +96,14 @@ public abstract class Item implements Cloneable {
    * Maakt een shallow kloon van dit object
    * @return kopie van het object of null
    */
-  @Override
-  public Object clone() {
-    try {
-      return super.clone();
-    } catch(CloneNotSupportedException e) { 
-      return null;
-    }
-  }
+  //@Override
+//  public Object clone() {
+//    try {
+//      return super.clone();
+//    } catch(CloneNotSupportedException e) { 
+//      return null;
+//    }
+//  }
   
   
   /**

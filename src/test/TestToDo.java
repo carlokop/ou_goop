@@ -71,7 +71,7 @@ public class TestToDo {
     
     //kloon
     t1 = new ToDo(1,"todo", d1);
-    ToDo kloon = t1.clone();
+    ToDo kloon = new ToDo(t1);
     assertEquals("todo", kloon.getTitel());
     assertEquals(1, kloon.getId());
     assertEquals("2024-06-14", kloon.getDatum().toString());

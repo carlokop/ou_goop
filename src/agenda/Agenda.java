@@ -206,7 +206,7 @@ public class Agenda {
      *
      * @param titel     de titel van de todo
      * @param datum     de datum waarop de todo moet worden uitgevoerd
-     * @return de id van de todo of -1 als er een fout is
+     * @return          de id van de todo of -1 als er een fout is
      */
      /*@ @contract happy path {
      @     @requires titel mag geen lege string zijn
@@ -305,8 +305,8 @@ public class Agenda {
      @     @ensures \result = lijst met een kopie van alle items(afspraken of todo's) die vallen in de periode
      @                        van begindatum tot en met einddatum
      @   }
-     @ @contract happy path {
-     @     @requires einddatum ligt na de begindatum;
+     @ @contract onjuiste datum {
+     @     @requires einddatum ligt voor de begindatum;
      @     @ensures \result = lege lijst
      @   }
      @*/
@@ -317,7 +317,14 @@ public class Agenda {
       for (Item item : items) {
           
           if((!item.getDatum().isBefore(begindatum)) && (!item.getDatum().isAfter(einddatum))) {
-            Item kopie = (Item) item.clone(); 
+            //Item kopie = (Item) item.clone(); 
+            Item kopie = null;
+            if(item instanceof Afspraak) {
+              kopie = new Afspraak((Afspraak) item);
+            } else if(item instanceof ToDo) {
+              kopie = new ToDo((ToDo) item);
+            }
+            
             gefilterdeitems.add(kopie);
           }
       }
@@ -344,7 +351,8 @@ public class Agenda {
       
       for( Item item: items) {
         if (item instanceof ToDo) {
-          ToDo kopie = (ToDo) item.clone();
+          //ToDo kopie = (ToDo) item.clone();
+          ToDo kopie = new ToDo((ToDo) item);
           if(datum.isEqual( kopie.getDatum()) && kopie.getAfgevinkt() == afgevinkt) {
             todos.add(kopie);
           }
@@ -374,8 +382,13 @@ public class Agenda {
     public Item /*@ pure */ getItem(int id)  {
       for(Item item: items) {
         if(id == item.getId()) {
-
-          return (Item) item.clone();
+          if(item instanceof Afspraak) {
+            return new Afspraak((Afspraak) item);
+          }
+          else if(item instanceof ToDo) {
+            return new ToDo((ToDo) item);
+          }
+          //return (Item) item.clone();
           
         }
       }
